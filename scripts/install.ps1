@@ -4,13 +4,13 @@
 # canonical install directory in the user's persistent environment variables.
 function Add-PkxUserPath {
     param([Parameter(Mandatory=$true)][string]$Directory)
-    $fullDir = [System.IO.Path]::GetFullPath($Directory).TrimEnd('\', '/')
+    $fullDir = [System.IO.Path]::GetFullPath($Directory).TrimEnd([char[]]@('\', '/'))
     $original = [Environment]::GetEnvironmentVariable('Path', [EnvironmentVariableTarget]::User)
     $entries = @($original -split ';' | Where-Object { $_ -and $_.Trim() })
     $alreadyPresent = $false
     foreach ($entry in $entries) {
         $candidate = [Environment]::ExpandEnvironmentVariables($entry.Trim().Trim('"'))
-        $candidate = $candidate.TrimEnd('\', '/')
+        $candidate = $candidate.TrimEnd([char[]]@('\', '/'))
         if ([string]::Equals($candidate, $fullDir, [StringComparison]::OrdinalIgnoreCase)) {
             $alreadyPresent = $true
             break

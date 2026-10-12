@@ -10,15 +10,16 @@ import (
 )
 
 var commandHelp = map[string]string{
-	"status":  "pkx status [--dir PATH] [--depth N] [--json]\n  Show detected projects, lockfiles, planned steps, and environment issues.\n  Reads project files and checks installed tool versions; changes nothing.\n",
-	"plan":    "pkx plan [--dir PATH] [--depth N] [--only MANAGER] [--json]\n  Preview the exact native install commands, without installing anything.\n  Use --json to integrate with scripts and editors.\n",
-	"scan":    "pkx scan [--dir PATH] [--depth N] [--json]\n  List projects detected under PATH. 'pkx ls' is a shortcut.\n",
-	"up":      "pkx up [--dir PATH] [--depth N] [--only MANAGER] [--dry-run]\n  Check the environment, then run native dependency installers.\n  Use 'pkx plan' first to see what will run.\n",
-	"install": "pkx install [--dir PATH] [--depth N] [--only MANAGER] [--dry-run]\n  Run native package managers without checking runtime version pins.\n  'pkx i' is a shortcut; 'pkx up' also checks the environment.\n",
-	"doctor":  "pkx doctor [--dir PATH] [--depth N]\n  Diagnose missing tools or incompatible pinned runtime versions.\n  Does not install runtimes or dependencies.\n",
-	"bundle":  "pkx bundle init [--dir PATH]\npkx bundle install FILE [--dir PATH] [--dry-run]\n  Create a local bundle manifest, or apply one after reviewing the plan.\n  'pkx init' is shorthand for 'pkx bundle init'.\n",
-	"init":    "pkx init [--dir PATH]\n  Shortcut for 'pkx bundle init'. Creates a starter pkx.json.\n",
-	"version": "pkx version\n  Print the version of the installed CLI.\n",
+	"status":     "pkx status [--dir PATH] [--depth N] [--json]\n  Show detected projects, lockfiles, planned steps, and environment issues.\n  Reads project files and checks installed tool versions; changes nothing.\n",
+	"plan":       "pkx plan [--dir PATH] [--depth N] [--only MANAGER] [--json]\n  Preview the exact native install commands, without installing anything.\n  Use --json to integrate with scripts and editors.\n",
+	"scan":       "pkx scan [--dir PATH] [--depth N] [--json]\n  List projects detected under PATH. 'pkx ls' is a shortcut.\n",
+	"up":         "pkx up [--dir PATH] [--depth N] [--only MANAGER] [--dry-run]\n  Check the environment, then run native dependency installers.\n  Use 'pkx plan' first to see what will run.\n",
+	"install":    "pkx install [--dir PATH] [--depth N] [--only MANAGER] [--dry-run]\n  Run native package managers without checking runtime version pins.\n  'pkx i' is a shortcut; 'pkx up' also checks the environment.\n",
+	"doctor":     "pkx doctor [--dir PATH] [--depth N] [--only MANAGER] [--json]\n  Diagnose missing tools or incompatible pinned runtime versions.\n  Use --json for automation (exit code 1 when issues are found).\n  Does not install runtimes or dependencies.\n",
+	"bundle":     "pkx bundle init [--dir PATH]\npkx bundle install FILE [--dir PATH] [--dry-run]\n  Create a local bundle manifest, or apply one after reviewing the plan.\n  'pkx init' is shorthand for 'pkx bundle init'.\n",
+	"init":       "pkx init [--dir PATH]\n  Shortcut for 'pkx bundle init'. Creates a starter pkx.json.\n",
+	"version":    "pkx version\n  Print the version of the installed CLI.\n",
+	"completion": "pkx completion <bash|zsh|fish|powershell>\n  Print tab completion for your shell; see the README for installation.\n",
 }
 
 func canonicalCommand(command string) string {
@@ -55,7 +56,7 @@ func showHelp(command string, stdout, stderr io.Writer) int {
 func closestCommand(value string) string {
 	value = strings.ToLower(value)
 	closest, score := "", 3
-	for _, name := range []string{"scan", "status", "plan", "up", "install", "doctor", "bundle", "init", "version"} {
+	for _, name := range []string{"scan", "status", "plan", "up", "install", "doctor", "bundle", "init", "version", "completion"} {
 		distance := editDistance(value, name)
 		if distance < score {
 			closest, score = name, distance
@@ -231,4 +232,22 @@ func countNoun(n int, noun string) string {
 		return noun
 	}
 	return noun + "s"
+}
+
+// filterProjects makes --only apply consistently to both the plan and diagnostics.
+func filterProjects(projects []Project, only string) []Project {
+	selected := make([]Project, 0, len(projects))
+	for _, project := range projects {
+		if only == "" || project.Ecosystem == only || project.Manager == only {
+			selected = append(selected, project)
+		}
+	}
+	return selected
+}
+
+type doctorReport struct {
+	Root        string       `json:"root"`
+	Ready       bool         `json:"ready"`
+	Projects    []Project    `json:"projects"`
+	Diagnostics []Diagnostic `json:"diagnostics"`
 }

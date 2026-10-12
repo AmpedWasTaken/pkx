@@ -4,7 +4,7 @@
 
 pkx doesn't replace npm, pip, Composer, or Cargo. It discovers the manifests already in your repository, chooses the appropriate native commands, and executes them from the correct directories. It also supports small, reviewable JSON dependency bundles.
 
-> **Status:** v0.3.0 developer preview. Local-first, no account, registry, telemetry, or background service. The planned public bundle marketplace is **not implemented**.
+> **Status:** v0.4.0 developer preview. Local-first, no account, registry, telemetry, or background service. The planned public bundle marketplace is **not implemented**.
 
 ## Quick start
 
@@ -16,7 +16,21 @@ cd pkx
 go install ./cmd/pkx
 ```
 
-Add `$(go env GOPATH)/bin` to your `PATH` if `pkx` isn't found. Cross-platform release archives are built by the GitHub release workflow when version tags are published.
+Add `$(go env GOPATH)/bin` to your `PATH` if `pkx` isn't found. Versioned release archives are produced by GitHub Actions when a release tag is published. After a release exists, you can install the latest published binary **without Go** using the checked-in installer scripts (review the scripts first):
+
+```sh
+# Linux / macOS; from the pkx repository checkout
+sh scripts/install.sh
+# Or request a specific published release: sh scripts/install.sh v0.4.0
+```
+
+```powershell
+# Windows PowerShell; from the pkx repository checkout
+.\scripts\install.ps1
+# Or: .\scripts\install.ps1 -Version v0.4.0
+```
+
+Both scripts verify the published SHA256 checksum and install to your user directory (`~/.local/bin`); they do not modify PATH automatically. If there is no published GitHub release yet, build from source using the Go command above.
 
 Then, from **any project directory**:
 
@@ -41,6 +55,8 @@ If a tool is missing, `pkx status` and `pkx doctor` show guidance. pkx doesn't i
 | `pkx install --dry-run` | Older preview syntax, kept for compatibility |
 | `pkx install --only node` | Install only one ecosystem or manager (`pnpm`, `pip`, etc.) |
 | `pkx doctor` | Check for missing tools and incompatible runtime pins |
+| `pkx doctor --json` | Machine-readable `ready`, `projects`, and diagnostics; exits 1 on issues |
+| `pkx completion bash` | Generate tab completion for your shell (also Zsh, Fish, PowerShell) |
 | `pkx init` | Create a local `pkx.json` starter bundle (no dependencies added) |
 | `pkx bundle install pkx.json --dry-run` | Preview applying a dependency bundle |
 | `pkx version` | Show CLI version |
@@ -55,7 +71,27 @@ pkx up --help         # The same help through a command
 pkx plan --dir ./apps # Plan for another workspace
 ```
 
-`scan`, `status`, `plan`, `up`, `install`, and `doctor` accept `--dir PATH` and `--depth N` (default 4, maximum 20). `plan`, `up`, and `install` accept `--only MANAGER` to select one ecosystem/manager. `--json` is available on `scan`, `plan` and `status`.
+`scan`, `status`, `plan`, `up`, `install`, and `doctor` accept `--dir PATH` and `--depth N` (default 4, maximum 20). `plan`, `up`, and `install` accept `--only MANAGER` to select one ecosystem/manager. `--json` is available on `scan`, `plan`, `status`, and `doctor`. `doctor` additionally accepts `--only` to focus on a single manager or ecosystem.
+
+### Terminal tab completion
+
+pkx generates shell completion scripts locally; it never edits shell startup files:
+
+```sh
+# Bash (if bash-completion is enabled)
+mkdir -p ~/.local/share/bash-completion/completions
+pkx completion bash > ~/.local/share/bash-completion/completions/pkx
+
+# Zsh (add the directory to fpath before compinit)
+mkdir -p ~/.zfunc
+pkx completion zsh > ~/.zfunc/_pkx
+
+# Fish
+mkdir -p ~/.config/fish/completions
+pkx completion fish > ~/.config/fish/completions/pkx.fish
+```
+
+For PowerShell, inspect `pkx completion powershell` then add its output to your PowerShell profile. Completion suggestions are static and require no network or background process.
 
 **Inspect a plan before running a third-party repository.** pkx invokes package managers with argument arrays (not shell strings), but those tools may download and execute untrusted lifecycle scripts.
 

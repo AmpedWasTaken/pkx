@@ -16,18 +16,26 @@ import (
 
 const help = `pkx — Package eXchange
 
-Usage:
-  pkx scan [--dir PATH] [--depth N] [--json]
-  pkx install [--dir PATH] [--depth N] [--only MANAGER] [--dry-run]
-  pkx up [--dir PATH] [--depth N] [--only MANAGER] [--dry-run]
-  pkx doctor [--dir PATH] [--depth N]
-  pkx bundle init [--dir PATH]
-  pkx bundle install FILE [--dir PATH] [--dry-run]
-  pkx version
+Get started:
+  pkx status               See what's in this repository
+  pkx plan                 Preview installs without running anything
+  pkx up                   Check your environment, then install dependencies
 
-pkx discovers existing projects and calls their native package managers.
-Commands run with your permissions and may execute dependency lifecycle scripts.
-Review untrusted repositories before installing.
+Commands:
+  status   Overview of projects, lockfiles and required tools
+  plan     Show the exact install plan (--json supported)
+  up       Check environment and install dependencies
+  scan     List detected projects (--json supported)
+  install  Install dependencies with native package managers
+  doctor   Diagnose missing tools and pinned versions
+  bundle   Initialize or install a local dependency bundle
+  version  Show the installed pkx version
+
+Shortcuts: pkx ls = scan, pkx i = install, pkx init = bundle init
+More help: pkx help <command> or pkx <command> --help
+
+Native package managers may run third-party scripts. Review untrusted
+repositories and run 'pkx plan' before installing.
 `
 
 func Run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
@@ -35,19 +43,40 @@ func Run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 		fmt.Fprint(stdout, help)
 		return 0
 	}
-	switch args[0] {
-	case "help", "-h", "--help":
-		fmt.Fprint(stdout, help)
-		return 0
+	command := canonicalCommand(args[0])
+	if command == "help" || command == "-h" || command == "--help" {
+		if len(args) == 1 {
+			fmt.Fprint(stdout, help)
+			return 0
+		}
+		if len(args) > 2 {
+			fmt.Fprintln(stderr, "pkx: usage: pkx help [command]")
+			return 2
+		}
+		return showHelp(canonicalCommand(args[1]), stdout, stderr)
+	}
+	if len(args) > 1 && (args[1] == "--help" || args[1] == "-h") {
+		return showHelp(command, stdout, stderr)
+	}
+	switch command {
 	case "version", "--version", "-v":
 		fmt.Fprintln(stdout, "pkx", Version)
 		return 0
-	case "scan", "install", "doctor", "up":
-		return runWorkspace(ctx, args[0], args[1:], stdout, stderr)
+	case "scan", "status", "plan", "install", "doctor", "up":
+		return runWorkspace(ctx, command, args[1:], stdout, stderr)
 	case "bundle":
+		if len(args) > 2 && (args[2] == "--help" || args[2] == "-h") {
+			return showHelp("bundle", stdout, stderr)
+		}
 		return runBundle(ctx, args[1:], stdout, stderr)
+	case "init":
+		return runBundle(ctx, append([]string{"init"}, args[1:]...), stdout, stderr)
 	default:
-		fmt.Fprintf(stderr, "pkx: unknown command %q\nRun 'pkx help' for usage.\n", args[0])
+		fmt.Fprintf(stderr, "pkx: unknown command %q.\n", args[0])
+		if suggestion := closestCommand(args[0]); suggestion != "" {
+			fmt.Fprintf(stderr, "Did you mean 'pkx %s'?\n", suggestion)
+		}
+		fmt.Fprintln(stderr, "Run 'pkx help' for available commands.")
 		return 2
 	}
 }
@@ -72,30 +101,33 @@ func runWorkspace(ctx context.Context, command string, args []string, stdout, st
 	fs, dir, depth := workspaceFlags(command, args, stderr)
 	only := fs.String("only", "", "select package manager or ecosystem")
 	dry := fs.Bool("dry-run", false, "show commands without executing them")
-	outputJSON := fs.Bool("json", false, "output projects as JSON (scan only)")
+	outputJSON := fs.Bool("json", false, "output machine-readable JSON")
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
 	if fs.NArg() > 0 {
-		fmt.Fprintln(stderr, "pkx: unexpected positional arguments")
+		fmt.Fprintln(stderr, "pkx: unexpected positional arguments; run 'pkx help "+command+"' for usage")
 		return 2
 	}
-	if command != "install" && command != "up" && (*only != "" || *dry) || command != "scan" && *outputJSON {
-		fmt.Fprintln(stderr, "pkx: flag is not supported by this command")
+	if (command != "install" && command != "up" && command != "plan" && *only != "") || (command != "install" && command != "up" && *dry) || (command != "scan" && command != "status" && command != "plan" && *outputJSON) {
+		fmt.Fprintf(stderr, "pkx: unsupported flag for %s; run 'pkx help %s' for usage\n", command, command)
 		return 2
 	}
 	root, err := rootPath(*dir)
 	if err != nil {
-		fmt.Fprintf(stderr, "pkx: %v\n", err)
+		fmt.Fprintf(stderr, "pkx: couldn't open workspace %q: %v\n", *dir, err)
 		return 1
 	}
 	projects, err := Discover(root, *depth)
 	if err != nil {
-		fmt.Fprintf(stderr, "pkx: scan failed: %v\n", err)
+		fmt.Fprintf(stderr, "pkx: couldn't scan %s: %v\n", root, err)
 		return 1
 	}
 	if command == "scan" {
 		if *outputJSON {
+			if projects == nil {
+				projects = []Project{}
+			}
 			if err := json.NewEncoder(stdout).Encode(projects); err != nil {
 				fmt.Fprintf(stderr, "pkx: %v\n", err)
 				return 1
@@ -103,7 +135,7 @@ func runWorkspace(ctx context.Context, command string, args []string, stdout, st
 			return 0
 		}
 		if len(projects) == 0 {
-			fmt.Fprintln(stdout, "No supported projects found.")
+			printNoProjects(stdout, root, *depth)
 			return 0
 		}
 		for _, p := range projects {
@@ -116,8 +148,14 @@ func runWorkspace(ctx context.Context, command string, args []string, stdout, st
 		fmt.Fprintf(stderr, "pkx: %v\n", err)
 		return 1
 	}
+	if command == "plan" {
+		return showPlan(root, projects, steps, *depth, *outputJSON, stdout, stderr)
+	}
+	if command == "status" {
+		return showStatus(root, projects, steps, *depth, *outputJSON, stdout, stderr)
+	}
 	if len(steps) == 0 {
-		fmt.Fprintln(stdout, "No supported projects found.")
+		printNoProjects(stdout, root, *depth)
 		return 0
 	}
 	if command == "doctor" || (command == "up" && !*dry) {

@@ -20,7 +20,7 @@ Get started:
   pkx status               See what's in this repository
   pkx plan                 Preview installs without running anything
   pkx up                   Check your environment, then install dependencies
-  pkx add axios             Add a package to a detected project
+  pkx install http-server     Detect project and install its package with the native manager
   pkx run dev               Run a project-defined script
 
 Commands:
@@ -28,7 +28,7 @@ Commands:
   plan     Show the exact install plan (--json supported)
   up       Check environment and install dependencies
   scan     List detected projects (--json supported)
-  install  Install dependencies with native package managers
+  install  Install project dependencies, or install PACKAGE into a detected project
   add      Add one or more dependencies to a selected project
   remove   Remove dependencies from a selected project
   run      Execute a declared Node/Composer project script
@@ -74,7 +74,12 @@ func Run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	case "version", "--version", "-v":
 		fmt.Fprintln(stdout, "pkx", Version)
 		return 0
-	case "scan", "status", "plan", "install", "doctor", "up":
+	case "scan", "status", "plan", "doctor", "up":
+		return runWorkspace(ctx, command, args[1:], stdout, stderr)
+	case "install":
+		if packageInstallRequested(args[1:]) {
+			return runUniversalInstall(ctx, args[1:], stdout, stderr)
+		}
 		return runWorkspace(ctx, command, args[1:], stdout, stderr)
 	case "add", "remove", "run":
 		return runManage(ctx, command, args[1:], stdout, stderr)

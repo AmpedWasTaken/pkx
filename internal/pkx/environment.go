@@ -13,10 +13,10 @@ import (
 )
 
 type Diagnostic struct {
-	Directory string
-	Tool      string
-	Problem   string
-	Fix       string
+	Directory string `json:"directory"`
+	Tool      string `json:"tool"`
+	Problem   string `json:"problem"`
+	Fix       string `json:"fix"`
 }
 
 func (d Diagnostic) String() string {

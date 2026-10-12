@@ -31,8 +31,11 @@ func BundlePlan(root, path string) ([]Step, error) {
 	if bundle.Schema != 1 {
 		return nil, fmt.Errorf("unsupported bundle schema %d (expected 1)", bundle.Schema)
 	}
-	if bundle.Name == "" || len(bundle.Packages) == 0 {
-		return nil, fmt.Errorf("bundle must have a name and packages")
+	if strings.TrimSpace(bundle.Name) == "" {
+		return nil, fmt.Errorf("bundle must have a name")
+	}
+	if len(bundle.Packages) == 0 {
+		return nil, fmt.Errorf("bundle %q has no packages yet; edit pkx.json and add at least one package group", bundle.Name)
 	}
 	steps := []Step{}
 	initialized := map[string]bool{}
@@ -134,6 +137,6 @@ func BundleInit(path string) error {
 		return err
 	}
 	defer f.Close()
-	_, err = f.Write([]byte("{\n  \"schema\": 1,\n  \"name\": \"my-stack\",\n  \"packages\": [\n    {\"manager\": \"npm\", \"directory\": \".\", \"dependencies\": [\"axios\"]}\n  ]\n}\n"))
+	_, err = f.Write([]byte("{\n  \"schema\": 1,\n  \"name\": \"my-stack\",\n  \"packages\": []\n}\n"))
 	return err
 }

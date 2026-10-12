@@ -1,132 +1,66 @@
-# pkx
+<p align="center"><img src="assets/pkx-mark.svg" width="88" height="88" alt="pkx logo" /></p>
+<h1 align="center">pkx — Package eXchange</h1>
+<p align="center"><strong>One command. Every ecosystem. Your existing package managers.</strong></p>
+<p align="center">
+  <a href="https://github.com/AmpedWasTaken/pkx/actions/workflows/ci.yml"><img alt="CI status" src="https://github.com/AmpedWasTaken/pkx/actions/workflows/ci.yml/badge.svg" /></a>
+  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-blue.svg" /></a>
+  <a href="CONTRIBUTING.md"><img alt="Contributions welcome" src="https://img.shields.io/badge/contributions-welcome-58b7a6.svg" /></a>
+  <a href="https://github.com/AmpedWasTaken/pkx/issues"><img alt="Open issues" src="https://img.shields.io/github/issues/AmpedWasTaken/pkx" /></a>
+</p>
+<p align="center">An open-source CLI for setting up mixed-language repositories.<br />No new dependency resolver. No replacement lockfiles. No required account.</p>
+<p align="center"><img src="assets/social-preview.svg" width="100%" alt="pkx: one command for every ecosystem" /></p>
 
-**Package eXchange** — run native package managers across a mixed-language repository with one command.
+> **Status:** `v0.4.0-dev` — developer preview, not a stable release. A remote bundle marketplace and automatic runtime installation do **not** exist yet.
 
-pkx doesn't replace npm, pip, Composer, or Cargo. It discovers the manifests already in your repository, chooses the appropriate native commands, and executes them from the correct directories. It also supports small, reviewable JSON dependency bundles.
+## Why pkx?
 
-> **Status:** v0.4.0 developer preview. Local-first, no account, registry, telemetry, or background service. The planned public bundle marketplace is **not implemented**.
+A repo can have a JavaScript frontend, a PHP backend and Python scripts. Getting started often means figuring out which package manager belongs in which folder, matching runtime versions and remembering install commands. **pkx finds those projects and delegates to their native tools.**
 
-## Quick start
+```sh
+cd your-project
+pkx status  # See detected projects, lockfiles and missing tools
+pkx plan    # Preview native commands; makes no changes
+pkx up      # Check the environment, then install dependencies
+```
 
-pkx only requires its own CLI plus the package managers your project uses. To build from source, install Go 1.23 or later:
+`pkx up` runs native package managers with your permissions; their lifecycle scripts may execute third-party code. Review untrusted repositories and use `pkx plan` first.
+
+## Install
+
+**Current developer preview:** build from source with Go 1.23+ (until tagged release archives are published):
 
 ```sh
 git clone https://github.com/AmpedWasTaken/pkx.git
 cd pkx
 go install ./cmd/pkx
+pkx version
 ```
 
-Add `$(go env GOPATH)/bin` to your `PATH` if `pkx` isn't found. Versioned release archives are produced by GitHub Actions when a release tag is published. After a release exists, you can install the latest published binary **without Go** using the checked-in installer scripts (review the scripts first):
+Make sure `$(go env GOPATH)/bin` is on `PATH`. On Windows, add the corresponding `go env GOPATH` `\bin` directory to `PATH`.
 
-```sh
-# Linux / macOS; from the pkx repository checkout
-sh scripts/install.sh
-# Or request a specific published release: sh scripts/install.sh v0.4.0
-```
-
-```powershell
-# Windows PowerShell; from the pkx repository checkout
-.\scripts\install.ps1
-# Or: .\scripts\install.ps1 -Version v0.4.0
-```
-
-Both scripts verify the published SHA256 checksum and install to your user directory (`~/.local/bin`); they do not modify PATH automatically. If there is no published GitHub release yet, build from source using the Go command above.
-
-Then, from **any project directory**:
-
-```sh
-pkx status                 # What projects, tools and lockfiles do I have?
-pkx plan                   # What commands would pkx run? No side effects
-pkx up                     # Validate runtimes, then install dependencies
-```
-
-If a tool is missing, `pkx status` and `pkx doctor` show guidance. pkx doesn't install Node, Python, PHP or other system tools behind your back.
+**After a release is published:** download from [GitHub Releases](https://github.com/AmpedWasTaken/pkx/releases) or use the checksum-verifying [`scripts/install.sh`](scripts/install.sh) / [`scripts/install.ps1`](scripts/install.ps1) from a reviewed checkout. The installers don't elevate privileges or modify `PATH` automatically. Full details: [Getting started](docs/GETTING_STARTED.md).
 
 ## Everyday commands
 
 | Command | What it does |
 | --- | --- |
-| `pkx status` | Show detected projects, lockfiles and environment warnings |
-| `pkx status --json` | Structured status for scripts and editor integrations |
-| `pkx plan` | Preview the native install commands; never execute anything |
-| `pkx plan --json` | Structured command plan using workspace-relative directories |
-| `pkx up` | Check required tools and version pins, then install dependencies |
-| `pkx scan [--json]` | List supported projects and selected package managers |
-| `pkx install --dry-run` | Older preview syntax, kept for compatibility |
-| `pkx install --only node` | Install only one ecosystem or manager (`pnpm`, `pip`, etc.) |
-| `pkx doctor` | Check for missing tools and incompatible runtime pins |
-| `pkx doctor --json` | Machine-readable `ready`, `projects`, and diagnostics; exits 1 on issues |
-| `pkx completion bash` | Generate tab completion for your shell (also Zsh, Fish, PowerShell) |
-| `pkx init` | Create a local `pkx.json` starter bundle (no dependencies added) |
-| `pkx bundle install pkx.json --dry-run` | Preview applying a dependency bundle |
-| `pkx version` | Show CLI version |
+| `pkx status` | Explain what's in this workspace and which tools are missing |
+| `pkx plan` | Preview native install commands **without** running them |
+| `pkx up` | Check the environment and install via native managers |
+| `pkx doctor` | Diagnose missing/incompatible runtimes (`--json` supported) |
+| `pkx scan` / `pkx ls` | Discover existing projects (`--json` supported) |
+| `pkx install` / `pkx i` | Install without runtime-version preflight (`--dry-run` supported) |
+| `pkx plan --only node` | Preview one ecosystem/manager |
+| `pkx init` | Create an empty local `pkx.json` bundle manifest |
+| `pkx bundle install pkx.json --dry-run` | Preview **explicit** dependency additions |
+| `pkx completion bash` | Generate shell completion (`zsh`, `fish`, `powershell` also supported) |
+| `pkx help plan` | Show help for one command |
 
-### Short commands and help
+Supports npm, pnpm, Yarn, Bun, pip, uv, Poetry, Composer, Cargo and Go modules. See [exact compatibility details](docs/GETTING_STARTED.md#supported-managers-and-behavior). Existing lockfiles remain authoritative.
 
-```sh
-pkx i --dry-run       # 'install' shortcut
-pkx ls                # 'scan' shortcut
-pkx help plan         # Command-specific examples and flags
-pkx up --help         # The same help through a command
-pkx plan --dir ./apps # Plan for another workspace
-```
+## Local dependency bundles
 
-`scan`, `status`, `plan`, `up`, `install`, and `doctor` accept `--dir PATH` and `--depth N` (default 4, maximum 20). `plan`, `up`, and `install` accept `--only MANAGER` to select one ecosystem/manager. `--json` is available on `scan`, `plan`, `status`, and `doctor`. `doctor` additionally accepts `--only` to focus on a single manager or ecosystem.
-
-### Terminal tab completion
-
-pkx generates shell completion scripts locally; it never edits shell startup files:
-
-```sh
-# Bash (if bash-completion is enabled)
-mkdir -p ~/.local/share/bash-completion/completions
-pkx completion bash > ~/.local/share/bash-completion/completions/pkx
-
-# Zsh (add the directory to fpath before compinit)
-mkdir -p ~/.zfunc
-pkx completion zsh > ~/.zfunc/_pkx
-
-# Fish
-mkdir -p ~/.config/fish/completions
-pkx completion fish > ~/.config/fish/completions/pkx.fish
-```
-
-For PowerShell, inspect `pkx completion powershell` then add its output to your PowerShell profile. Completion suggestions are static and require no network or background process.
-
-**Inspect a plan before running a third-party repository.** pkx invokes package managers with argument arrays (not shell strings), but those tools may download and execute untrusted lifecycle scripts.
-
-## Supported project types
-
-| Project marker | Manager | Install behavior |
-| --- | --- | --- |
-| `package.json` + `package-lock.json` | npm | `npm ci` |
-| `package.json` (no lockfile) | npm | `npm install` |
-| `package.json` + `pnpm-lock.yaml` | pnpm | `pnpm install --frozen-lockfile` |
-| `package.json` + `yarn.lock` | Yarn | Yarn 1: `--frozen-lockfile`; Yarn 2+: `--immutable` when specified in `packageManager` |
-| `package.json` + `bun.lock` / `bun.lockb` | Bun | `bun install --frozen-lockfile` |
-| `composer.json` | Composer | `composer install --no-interaction` |
-| `Cargo.toml` | Cargo | `cargo fetch` (downloads dependencies, does not build) |
-| `go.mod` | Go | `go mod download` |
-| `uv.lock` + `pyproject.toml` | uv | `uv sync --locked` |
-| `poetry.lock` + `pyproject.toml` | Poetry | `poetry install --no-interaction` |
-| `requirements.txt` | pip | create/reuse local `.venv`, then install requirements |
-
-If `package.json` defines `packageManager`, that supported manager takes precedence over lockfile inference. If different Node lockfiles disagree and no manager is specified, pkx stops instead of guessing. An unsupported Python `pyproject.toml` without a supported lockfile or requirements file is ignored.
-
-Python installs with pip use a **project-local `.venv`**, not the global interpreter. On Windows, pkx looks for `python`; on Unix, `python3`.
-
-## Bundles
-
-Bundles are **a separate, explicit operation**. Ordinary `pkx install` never installs arbitrary bundle contents. Start with:
-
-```sh
-pkx init                     # Generates a starter with an empty packages array
-# Edit pkx.json to add the dependencies you actually want
-pkx bundle install pkx.json --dry-run
-pkx bundle install pkx.json
-```
-
-A `pkx.json` bundle has this form:
+Bundles share a *list of dependencies*, not a new package format. `pkx init` creates a manifest with **no packages**. Add entries for existing project directories, preview them, and install explicitly:
 
 ```json
 {
@@ -139,30 +73,27 @@ A `pkx.json` bundle has this form:
 }
 ```
 
-Supported bundle managers: npm, pnpm, Yarn, Bun, Composer, and pip. Bundles add dependencies through their native manager and **can modify the project's manifests and lockfiles**; inspect the resulting diff. pip bundle dependencies install into the target directory's `.venv`, which pkx creates if necessary. Bundles can't contain arbitrary shell commands. Bundle directories must exist inside the workspace and cannot escape it through `..` or symlinks. Paths are relative to `--dir` (default: current directory).
-
-## Design decisions and limits
-
-- No separate cross-ecosystem lockfile or dependency solver. Existing lockfiles remain the source of truth.
-- No automatic downloading of runtimes. `pkx doctor` reports missing commands so you can install them deliberately.
-- A deterministic, sequential plan avoids partially parallel writes to shared lockfiles. A failed command stops remaining steps.
-- Project discovery is bounded by `--depth`; generated folders and hidden directories are ignored.
-- No automatic rollback: installers can change files before failing. Review `git diff` and native tool output.
-- No registry, signatures, audit command, or package publishing in this version.
-- `status` checks environment readiness, not whether all dependencies have already been installed.
-- `plan` previews native commands; it does not guarantee the native installer will succeed.
-
-## Development
-
 ```sh
-go test ./...
-go test -race ./...
-go vet ./...
-go build ./cmd/pkx
+pkx bundle install pkx.json --dry-run
+pkx bundle install pkx.json
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md).
+Directories must exist inside the workspace. Bundle installation may modify manifests and native lockfiles. There is **no hosted registry** in this preview.
 
-## License
+## Built with contributors
 
-MIT. See [LICENSE](LICENSE).
+pkx is MIT licensed and developed in the open. Bug fixes, tests, documentation, platform reports and new adapter proposals are welcome. You can fix a typo immediately; for larger behavior changes, start with an issue so the design stays maintainable.
+
+- **[Contributing](CONTRIBUTING.md)** — how to set up, test and submit a PR
+- **[Good first issues](https://github.com/AmpedWasTaken/pkx/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)** · **[All issues](https://github.com/AmpedWasTaken/pkx/issues)** — choose a task or report friction
+- **[Roadmap](docs/ROADMAP.md)** · **[Architecture](docs/ARCHITECTURE.md)** — project scope and decisions
+- **[Support](SUPPORT.md)** · **[Code of conduct](CODE_OF_CONDUCT.md)** · **[Security](SECURITY.md)**
+
+If pkx helps in your own repo, **try it and open an issue with a reproducible case**. Real-world layouts and platform-specific issues are especially useful. Stars are appreciated, but good reports and PRs matter more.
+
+## Scope and safety
+
+pkx does **not** install system runtimes, run a daemon, collect telemetry, guarantee native installation success or automatically roll back file changes. `status` checks tool readiness rather than installed dependencies; `plan` previews commands, not their downstream effects. Cargo and Go steps download dependencies without building. Read [design principles](docs/ARCHITECTURE.md) and [security notes](SECURITY.md).
+
+---
+<sub>Maintained by <a href="https://github.com/AmpedWasTaken">AmpedWasTaken</a> with contributions welcome. MIT licensed.</sub>

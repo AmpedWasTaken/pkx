@@ -14,7 +14,9 @@
 
 ## Install in one line
 
-**Safer manual option (no pipe-to-shell):** Download your OS archive **and `SHA256SUMS`** from [the official GitHub release](https://github.com/AmpedWasTaken/pkx/releases/tag/v0.5.0). Compare the archive's SHA256 with its matching checksum entry, extract `pkx` / `pkx.exe` and add its folder to your user `PATH`. [Full steps and troubleshooting](docs/GETTING_STARTED.md).\n\n**Convenience installers:** [pkx.ampedwastaken.dev](https://pkx.ampedwastaken.dev) ([website source](https://github.com/AmpedWasTaken/pkx-website)). **Review the scripts before running them**: checksums verify the downloaded archive against the published checksum list, but they do not independently authenticate the remotely served installer or prevent a compromised release account from changing both files.
+**Safer manual option (no pipe-to-shell):** Download your OS archive **and `SHA256SUMS`** from [the official GitHub release](https://github.com/AmpedWasTaken/pkx/releases/tag/v0.5.0). Compare the archive's SHA256 with its matching checksum entry, extract `pkx` / `pkx.exe` and add its folder to your user `PATH`. [Full steps and troubleshooting](docs/GETTING_STARTED.md).
+
+**Convenience installers:** [pkx.ampedwastaken.dev](https://pkx.ampedwastaken.dev) ([website source](https://github.com/AmpedWasTaken/pkx-website)). **Review the scripts before running them**: checksums verify the downloaded archive against the published checksum list, but they do not independently authenticate the remotely served installer or prevent a compromised release account from changing both files.
 
 **Windows — CMD or PowerShell**
 
@@ -57,7 +59,14 @@ pkx doctor                    # Diagnose missing tools
 pkx install --dry-run         # Preview without making changes
 ```
 
-**Current scope (important):**\n\n| Capability | Supported managers |\n| --- | --- |\n| **Install / `pkx up`** | **10:** npm, pnpm, Yarn, Bun, pip, uv, Poetry, Composer, Cargo, Go modules |\n| **`add` / `remove` / `run`** | **5:** npm, pnpm, Yarn, Bun, Composer (Node + PHP only) |\n\n**Python, Rust and Go add/remove/run are not supported yet.** See [compatibility and limitations](docs/GETTING_STARTED.md#supported-managers-and-behavior). Marketplace discovery is in unreleased v0.6 development source; the published v0.5.0 binary does **not** have `pkx bundle search/info/fetch`.
+**Current scope (important):**
+
+| Capability | Supported managers |
+| --- | --- |
+| **Install / `pkx up`** | **10:** npm, pnpm, Yarn, Bun, pip, uv, Poetry, Composer, Cargo, Go modules |
+| **`add` / `remove` / `run`** | **5:** npm, pnpm, Yarn, Bun, Composer (Node + PHP only) |
+
+**Python, Rust and Go add/remove/run are not supported yet.** See [compatibility and limitations](docs/GETTING_STARTED.md#supported-managers-and-behavior). Marketplace discovery is in unreleased v0.6 development source; the published v0.5.0 binary does **not** have `pkx bundle search/info/fetch`.
 
 > pkx invokes native package managers, which may execute third-party lifecycle scripts. Always inspect untrusted repositories and use `pkx plan` first. Runtime installation and the remote bundle marketplace are not implemented yet.
 

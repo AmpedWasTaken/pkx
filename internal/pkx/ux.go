@@ -122,7 +122,7 @@ func showPlan(root string, projects []Project, steps []Step, depth int, outputJS
 		printNoProjects(stdout, root, depth)
 		return 0
 	}
-	fmt.Fprintf(stdout, "Install plan (%d commands across %d projects):\n", len(report.Steps), len(report.Projects))
+	fmt.Fprintf(stdout, "Install plan (%d %s across %d %s):\n", len(report.Steps), countNoun(len(report.Steps), "command"), len(report.Projects), countNoun(len(report.Projects), "project"))
 	for _, step := range steps {
 		fmt.Fprintf(stdout, "  %-12s %-14s %s\n", relative(root, step.Directory), step.Manager, step.String())
 	}
@@ -162,7 +162,7 @@ func showStatus(root string, projects []Project, steps []Step, depth int, output
 		printNoProjects(stdout, root, depth)
 		return 0
 	}
-	fmt.Fprintf(stdout, "Workspace: %s\n%d project(s), %d planned native command(s)\n", root, len(report.Projects), len(steps))
+	fmt.Fprintf(stdout, "Workspace: %s\n%d %s, %d planned native %s\n", root, len(report.Projects), countNoun(len(report.Projects), "project"), len(steps), countNoun(len(steps), "command"))
 	for _, project := range report.Projects {
 		lock := "no lockfile detected"
 		if project.Lockfile != "" {
@@ -171,7 +171,7 @@ func showStatus(root string, projects []Project, steps []Step, depth int, output
 		fmt.Fprintf(stdout, "  %-14s %-10s %-10s %s\n", project.Directory, project.Ecosystem, project.Manager, lock)
 	}
 	if len(report.Diagnostics) > 0 {
-		fmt.Fprintf(stdout, "Environment: %d issue(s) to resolve:\n", len(report.Diagnostics))
+		fmt.Fprintf(stdout, "Environment: %d %s to resolve:\n", len(report.Diagnostics), countNoun(len(report.Diagnostics), "issue"))
 		for _, issue := range report.Diagnostics {
 			fmt.Fprintf(stdout, "  ! %s\n", issue.String())
 		}
@@ -224,4 +224,11 @@ func writeJSON(value any, stdout, stderr io.Writer) int {
 		return 1
 	}
 	return 0
+}
+
+func countNoun(n int, noun string) string {
+	if n == 1 {
+		return noun
+	}
+	return noun + "s"
 }

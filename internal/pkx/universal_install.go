@@ -12,7 +12,21 @@ import (
 )
 
 var npmPackageName = regexp.MustCompile(`^(?:@[a-z0-9][a-z0-9._~-]*/)?[a-z0-9][a-z0-9._~-]*$`)
-var commonPackageName = regexp.MustCompile(`^[a-z0-9][a-z0-9._-]*$`)
+var commonPackageName = regexp.MustCompile(`(?i)^[a-z0-9][a-z0-9._-]*package pkx
+
+import (
+	"context"
+	"fmt"
+	"io"
+	"os"
+	"path/filepath"
+	"regexp"
+	"sort"
+	"strings"
+)
+
+var npmPackageName = regexp.MustCompile(`^(?:@[a-z0-9][a-z0-9._~-]*/)?[a-z0-9][a-z0-9._~-]*$`)
+)
 var composerPackageName = regexp.MustCompile(`^[a-z0-9][a-z0-9._-]*/[a-z0-9][a-z0-9._-]*$`)
 var goModuleName = regexp.MustCompile(`^[a-z0-9][a-z0-9.-]*\.[a-z]{2,}(?:/[a-z0-9][a-z0-9._~+-]*)+$`)
 
@@ -175,5 +189,8 @@ func runUniversalInstall(ctx context.Context, args []string, stdout, stderr io.W
 		return 2
 	}
 	fmt.Fprintf(stdout, "Detected %s project using %s at %s.\n", project.Ecosystem, project.Manager, project.Directory)
+	if project.Manager == "pip" {
+		fmt.Fprintln(stdout, "Note: pip install does not update requirements.txt; record the dependency there for reproducible setup.")
+	}
 	return execute(ctx, root, steps, opts.DryRun, stdout, stderr)
 }

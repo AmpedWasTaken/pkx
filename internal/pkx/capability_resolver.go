@@ -36,9 +36,9 @@ type capabilityVariant struct {
 }
 
 type resolvedPackage struct {
-	Requested  string
-	Package    string
-	Capability string
+	Requested   string
+	Package     string
+	Capability  string
 	Alternative bool
 }
 

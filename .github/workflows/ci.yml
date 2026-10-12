@@ -31,6 +31,13 @@ jobs:
           fi
       - name: Check Markdown links and SVG assets
         run: go run ./scripts/check-docs.go
+      - name: Verify hosted installer sources
+        shell: bash
+        run: |
+          cmp -s scripts/install.ps1 site/install.ps1 || { echo "site/install.ps1 must match scripts/install.ps1"; exit 1; }
+          cmp -s scripts/install.sh site/install.sh || { echo "site/install.sh must match scripts/install.sh"; exit 1; }
+          sh -n site/install.sh
+          sh site/install.sh --help
       - name: Verify Unix installer
         if: runner.os != 'Windows'
         shell: bash

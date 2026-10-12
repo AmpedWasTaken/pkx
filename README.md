@@ -12,76 +12,47 @@
 
 > **Version:** `v0.5.0` — first public **0.x** release candidate. The CLI is usable but its interfaces may change before v1.0. A remote bundle marketplace and automatic runtime installation do **not** exist yet.
 
-## Install once, use `pkx` anywhere
+## Install in one command
 
-**pkx is a standalone executable:** you do **not** need Go, Node.js, npm or administrator rights to install the [published binaries](https://github.com/AmpedWasTaken/pkx/releases/tag/v0.5.0). To install dependencies *inside a project*, the relevant native manager (npm, Composer, etc.) must still be installed.
+**No Go or npm is required to install pkx itself.** These commands install the published binary (with SHA256 archive verification), then set up your user PATH so you can type `pkx` from **any newly opened terminal**.
 
-### Windows — works globally in CMD and PowerShell
-
-**Recommended (automated, with checksum verification):** Open **CMD** in any directory and run these commands. This method needs Git to fetch the installer script, but does not need Go or npm:
+**Windows — CMD or PowerShell**
 
 ```cmd
-git clone https://github.com/AmpedWasTaken/pkx.git
-cd pkx
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Version v0.5.0 -AddToPath
+powershell -NoProfile -ExecutionPolicy Bypass -Command "& ([scriptblock]::Create((irm 'https://pkx.ampedwastaken.dev/install.ps1'))) -AddToPath"
 ```
 
-The script verifies the GitHub release archive's SHA256, installs `pkx.exe` into **`%USERPROFILE%\.local\bin`** and (only with `-AddToPath`) permanently adds that folder to **your user PATH**. It doesn't require admin permissions or change the system PATH. You can inspect [the installer source](scripts/install.ps1) before running it.
+**macOS / Linux — Bash or Zsh**
 
-**Important: close CMD / PowerShell and open a NEW terminal** after installation. From **any directory**, run:
+```sh
+curl -fsSL https://pkx.ampedwastaken.dev/install.sh | sh -s -- --add-to-path
+```
 
-```cmd
-where pkx
+**After installation:** Close your current terminal, open a **new** CMD, PowerShell, Bash or Zsh window and run:
+
+```sh
 pkx version
-cd C:\path\to\your-project
 pkx status
 pkx plan
-pkx up
 ```
 
-**Without Git or PowerShell scripts:** Download `pkx_v0.5.0_windows_amd64.zip` (x64 PCs) or `pkx_v0.5.0_windows_arm64.zip` (Windows ARM) from [GitHub Releases](https://github.com/AmpedWasTaken/pkx/releases/tag/v0.5.0). Verify it against `SHA256SUMS`, unzip `pkx.exe` into `%USERPROFILE%\.local\bin`, then add that folder to your *user* `Path` in **Edit environment variables for your account → Path → New**. Open a new CMD and run `pkx version`.
+The Windows command installs to `%USERPROFILE%\.local\bin` and updates **only your user PATH**; it never needs administrator rights. The macOS/Linux command installs to `~/.local/bin` and adds it to your Bash/Zsh startup file. You still need the native package managers (such as Node/npm or PHP/Composer) for projects that use them.
 
-### macOS or Linux — works in every terminal
+The scripts are available to inspect at **[pkx.ampedwastaken.dev](https://pkx.ampedwastaken.dev)**: [Windows source](https://pkx.ampedwastaken.dev/install.ps1) · [Unix source](https://pkx.ampedwastaken.dev/install.sh). Executing any remotely hosted install script involves trusting the source and HTTPS host; review it first if you prefer. The installer checks the official GitHub archive against the release checksum file.
 
-From a reviewed checkout (Git required, but no Go/npm):
+<details><summary><strong>Manual installation / Go install / PATH troubleshooting</strong></summary>
 
-```sh
-git clone https://github.com/AmpedWasTaken/pkx.git
-cd pkx
-sh scripts/install.sh v0.5.0
-```
+Download your OS archive and `SHA256SUMS` from [GitHub Releases](https://github.com/AmpedWasTaken/pkx/releases/tag/v0.5.0), verify the checksum, and extract `pkx.exe` on Windows or `pkx` on Unix. Place it in an existing PATH directory, or add its folder to PATH.
 
-The checksum-verifying script installs `pkx` to `~/.local/bin`. If `pkx version` returns **command not found**, add that directory to your shell PATH **once**:
+Windows manual default: `%USERPROFILE%\.local\bin`. Open **Edit environment variables for your account → Path → New**, enter that directory, and open a new terminal. Check with `where pkx` in CMD or `Get-Command pkx` in PowerShell.
 
-**macOS (default Zsh):**
+macOS/Linux manual default: `~/.local/bin`. Put `export PATH="$HOME/.local/bin:$PATH"` in `~/.zprofile` (macOS Zsh) or `~/.bashrc` (Linux Bash). Open a new terminal and check with `command -v pkx`.
 
-```sh
-echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zprofile
-source ~/.zprofile
-pkx version
-```
+Already have Go 1.23+? `go install github.com/AmpedWasTaken/pkx/cmd/pkx@v0.5.0` works if `$(go env GOPATH)/bin` (or `GOBIN`) is on PATH.
 
-**Linux (Bash):**
+If the one-liner fails, inspect `scripts/install.ps1` or `scripts/install.sh` in the repository and follow [the full troubleshooting guide](docs/GETTING_STARTED.md). The v0.5.0 binary release stays immutable; the installer website follows reviewed `main` updates.
 
-```sh
-echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
-source ~/.bashrc
-pkx version
-```
-
-You can instead download your matching `.tar.gz` and `SHA256SUMS` from [GitHub Releases](https://github.com/AmpedWasTaken/pkx/releases/tag/v0.5.0), verify it, and manually place the executable in a directory already on your PATH.
-
-### Alternative: install with Go
-
-If you already have Go 1.23+ and prefer `go install`:
-
-```sh
-go install github.com/AmpedWasTaken/pkx/cmd/pkx@v0.5.0
-```
-
-Go installs the binary in `$(go env GOPATH)/bin` (unless `GOBIN` is configured). **That directory must also be on your PATH** for `pkx` to work globally.
-
-**Troubleshooting:** On Windows CMD use `where pkx`, in PowerShell use `Get-Command pkx`, and on macOS/Linux use `command -v pkx`. If the binary is installed but not detected, check the PATH entry and restart your terminal (on Windows, signing out/in may be necessary for apps that kept an old environment). For the full guide see [Getting started](docs/GETTING_STARTED.md).
+</details>
 
 ## Development status
 

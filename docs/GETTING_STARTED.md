@@ -18,7 +18,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command "& ([scriptblock]::Create
 curl -fsSL https://pkx.ampedwastaken.dev/install.sh | sh -s -- --add-to-path
 ```
 
-The installer uses the latest published GitHub release and verifies the downloaded archive's SHA256 against the release checksum file. The scripts themselves are served over HTTPS and are open source in `site/install.ps1` and `site/install.sh`. You should review scripts before running downloaded code on untrusted hosts.
+The installer uses the latest published GitHub release and verifies the downloaded archive's SHA256 against the release checksum file. The scripts themselves are served over HTTPS and are open source in [`pkx-website`](https://github.com/AmpedWasTaken/pkx-website) as `install.ps1` and `install.sh`. You should review scripts before running downloaded code on untrusted hosts.
 
 These commands opt into user-level PATH setup: on Windows pkx installs to `%USERPROFILE%\.local\bin`; on macOS/Linux to `~/.local/bin`. Close the terminal and open a **new** one, then verify:
 

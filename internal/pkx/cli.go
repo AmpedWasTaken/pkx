@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 const help = `pkx — Package eXchange
@@ -18,6 +19,7 @@ const help = `pkx — Package eXchange
 Usage:
   pkx scan [--dir PATH] [--depth N] [--json]
   pkx install [--dir PATH] [--depth N] [--only MANAGER] [--dry-run]
+  pkx up [--dir PATH] [--depth N] [--only MANAGER] [--dry-run]
   pkx doctor [--dir PATH] [--depth N]
   pkx bundle init [--dir PATH]
   pkx bundle install FILE [--dir PATH] [--dry-run]
@@ -40,7 +42,7 @@ func Run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	case "version", "--version", "-v":
 		fmt.Fprintln(stdout, "pkx", Version)
 		return 0
-	case "scan", "install", "doctor":
+	case "scan", "install", "doctor", "up":
 		return runWorkspace(ctx, args[0], args[1:], stdout, stderr)
 	case "bundle":
 		return runBundle(ctx, args[1:], stdout, stderr)
@@ -78,7 +80,7 @@ func runWorkspace(ctx context.Context, command string, args []string, stdout, st
 		fmt.Fprintln(stderr, "pkx: unexpected positional arguments")
 		return 2
 	}
-	if (command != "install" && (*only != "" || *dry)) || (command != "scan" && *outputJSON) {
+	if command != "install" && command != "up" && (*only != "" || *dry) || command != "scan" && *outputJSON {
 		fmt.Fprintln(stderr, "pkx: flag is not supported by this command")
 		return 2
 	}
@@ -118,17 +120,25 @@ func runWorkspace(ctx context.Context, command string, args []string, stdout, st
 		fmt.Fprintln(stdout, "No supported projects found.")
 		return 0
 	}
-	if command == "doctor" {
-		missing := MissingCommands(steps, exec.LookPath)
-		for _, p := range projects {
-			fmt.Fprintf(stdout, "✓ %s (%s) at %s\n", p.Manager, p.Ecosystem, p.Directory)
+	if command == "doctor" || (command == "up" && !*dry) {
+		diagnostics := CheckEnvironment(root, projects, steps, exec.LookPath, ProbeVersion)
+		if command == "doctor" {
+			for _, p := range projects {
+				fmt.Fprintf(stdout, "✓ %s (%s) at %s\n", p.Manager, p.Ecosystem, p.Directory)
+			}
 		}
-		if len(missing) > 0 {
-			fmt.Fprintf(stderr, "Missing tools: %s\n", strings.Join(missing, ", "))
+		for _, d := range diagnostics {
+			fmt.Fprintf(stderr, "pkx: %s\n", d.String())
+		}
+		if len(diagnostics) > 0 {
+			fmt.Fprintf(stderr, "pkx: %d environment issue(s); no installation started\n", len(diagnostics))
 			return 1
 		}
-		fmt.Fprintln(stdout, "All required package managers are available.")
-		return 0
+		if command == "doctor" {
+			fmt.Fprintln(stdout, "Environment checks passed.")
+			return 0
+		}
+		fmt.Fprintln(stdout, "Environment checks passed; installing dependencies...")
 	}
 	return execute(ctx, root, steps, *dry, stdout, stderr)
 }
@@ -143,6 +153,7 @@ func runBundle(ctx context.Context, args []string, stdout, stderr io.Writer) int
 	fs.SetOutput(stderr)
 	dir := fs.String("dir", ".", "workspace directory")
 	dry := fs.Bool("dry-run", false, "show commands without executing")
+	// For bundle install, flags before and after the filename are accepted.
 	var file string
 	rest := args[1:]
 	if name == "install" && len(rest) > 0 && !strings.HasPrefix(rest[0], "-") {
@@ -177,6 +188,7 @@ func runBundle(ctx context.Context, args []string, stdout, stderr io.Writer) int
 			fmt.Fprintln(stderr, "pkx: usage: pkx bundle install FILE [--dir PATH] [--dry-run]")
 			return 2
 		}
+		// Bundle path is relative to the workspace, not the caller's working directory.
 		if !filepath.IsAbs(file) {
 			file = filepath.Join(root, file)
 		}
@@ -209,13 +221,19 @@ func execute(ctx context.Context, root string, steps []Step, dry bool, stdout, s
 		fmt.Fprintf(stderr, "pkx: required tools not found in PATH: %s\n", strings.Join(missing, ", "))
 		return 1
 	}
+	began := time.Now()
+	completed := 0
 	for _, step := range steps {
+		started := time.Now()
 		fmt.Fprintf(stdout, "→ %s (%s)\n", step.Manager, relative(root, step.Directory))
 		cmd := exec.CommandContext(ctx, step.Binary, step.Args...)
 		cmd.Dir = step.Directory
 		cmd.Stdin = os.Stdin
 		cmd.Stdout, cmd.Stderr = stdout, stderr
 		if err := cmd.Run(); err != nil {
+			fmt.Fprintf(stderr, "pkx: failed after %s (%d/%d steps completed)\n", time.Since(began).Round(time.Millisecond), completed, len(steps))
+			fmt.Fprintf(stderr, "pkx: retry in %s with: %s\n", step.Directory, step.String())
+			fmt.Fprintf(stderr, "pkx: run `pkx doctor` to check the local environment; inspect lockfile changes before retrying\n")
 			var exit *exec.ExitError
 			if errors.As(err, &exit) {
 				fmt.Fprintf(stderr, "pkx: %s exited with status %d\n", step.Manager, exit.ExitCode())
@@ -225,7 +243,9 @@ func execute(ctx context.Context, root string, steps []Step, dry bool, stdout, s
 			}
 			return 1
 		}
+		completed++
+		fmt.Fprintf(stdout, "✓ %s in %s\n", step.Manager, time.Since(started).Round(time.Millisecond))
 	}
-	fmt.Fprintf(stdout, "Done: %d command(s) completed successfully.\n", len(steps))
+	fmt.Fprintf(stdout, "Done: %d command(s) completed successfully in %s.\n", len(steps), time.Since(began).Round(time.Millisecond))
 	return 0
 }

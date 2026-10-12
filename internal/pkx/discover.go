@@ -3,15 +3,17 @@ package pkx
 import (
 	"fmt"
 	"io/fs"
+	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 )
 
 var ignoredDirectories = map[string]bool{
-	".git": true, "node_modules": true, "vendor": true, ".venv": true, "venv": true,
-	"target": true, "dist": true, "build": true, ".next": true, ".turbo": true,
-	".cache": true, "__pycache__": true, ".pnpm": true, ".idea": true, ".tox": true,
+	".git": true, "node_modules": true, "vendor": true, ".venv": true,
+	"venv": true, "target": true, "dist": true, "build": true,
+	".next": true, ".turbo": true, ".cache": true, "__pycache__": true,
+	".pnpm": true, ".idea": true, ".tox": true,
 }
 
 func Discover(root string, maxDepth int) ([]Project, error) {
@@ -86,7 +88,7 @@ func Discover(root string, maxDepth int) ([]Project, error) {
 		}
 		return projects[i].Ecosystem < projects[j].Ecosystem
 	})
-	return projects, nil
+	return CollapseNodeWorkspaces(root, projects), nil
 }
 
 func nodeManager(dir string, files map[string]bool) (string, error) {
@@ -106,8 +108,9 @@ func nodeManager(dir string, files map[string]bool) (string, error) {
 		}
 	}
 	locks := []struct{ name, manager string }{
-		{"pnpm-lock.yaml", "pnpm"}, {"yarn.lock", "yarn"}, {"bun.lock", "bun"},
-		{"bun.lockb", "bun"}, {"package-lock.json", "npm"}, {"npm-shrinkwrap.json", "npm"},
+		{"pnpm-lock.yaml", "pnpm"}, {"yarn.lock", "yarn"},
+		{"bun.lock", "bun"}, {"bun.lockb", "bun"},
+		{"package-lock.json", "npm"}, {"npm-shrinkwrap.json", "npm"},
 	}
 	found := map[string]bool{}
 	for _, lock := range locks {
@@ -118,8 +121,8 @@ func nodeManager(dir string, files map[string]bool) (string, error) {
 	if len(found) > 1 {
 		return "", fmt.Errorf("conflicting Node lockfiles: specify packageManager in package.json")
 	}
-	for manager := range found {
-		return manager, nil
+	for name := range found {
+		return name, nil
 	}
 	return "npm", nil
 }
@@ -143,5 +146,16 @@ func pythonManager(files map[string]bool) (string, string, error) {
 	if files["requirements.txt"] {
 		return "pip", "requirements.txt", nil
 	}
-	return "", "", fmt.Errorf("no supported Python manifest")
+	return "", "", fmt.Errorf("pyproject.toml has no supported lockfile or requirements.txt; use uv, Poetry, or requirements.txt")
+}
+
+func readDir(path string) (bool, error) {
+	st, err := os.Stat(path)
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	return st.IsDir(), nil
 }

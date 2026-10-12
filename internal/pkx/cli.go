@@ -30,6 +30,7 @@ Commands:
   doctor   Diagnose missing tools and pinned versions
   bundle   Initialize or install a local dependency bundle
   version  Show the installed pkx version
+  completion  Generate shell tab-completion (bash, zsh, fish, powershell)
 
 Shortcuts: pkx ls = scan, pkx i = install, pkx init = bundle init
 More help: pkx help <command> or pkx <command> --help
@@ -59,6 +60,12 @@ func Run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 		return showHelp(command, stdout, stderr)
 	}
 	switch command {
+	case "completion":
+		if len(args) != 2 {
+			fmt.Fprintln(stderr, "pkx: usage: pkx completion <bash|zsh|fish|powershell>")
+			return 2
+		}
+		return writeCompletion(args[1], stdout, stderr)
 	case "version", "--version", "-v":
 		fmt.Fprintln(stdout, "pkx", Version)
 		return 0
@@ -109,7 +116,7 @@ func runWorkspace(ctx context.Context, command string, args []string, stdout, st
 		fmt.Fprintln(stderr, "pkx: unexpected positional arguments; run 'pkx help "+command+"' for usage")
 		return 2
 	}
-	if (command != "install" && command != "up" && command != "plan" && *only != "") || (command != "install" && command != "up" && *dry) || (command != "scan" && command != "status" && command != "plan" && *outputJSON) {
+	if (command != "install" && command != "up" && command != "plan" && command != "doctor" && *only != "") || (command != "install" && command != "up" && *dry) || (command != "scan" && command != "status" && command != "plan" && command != "doctor" && *outputJSON) {
 		fmt.Fprintf(stderr, "pkx: unsupported flag for %s; run 'pkx help %s' for usage\n", command, command)
 		return 2
 	}
@@ -149,19 +156,36 @@ func runWorkspace(ctx context.Context, command string, args []string, stdout, st
 		return 1
 	}
 	if command == "plan" {
-		return showPlan(root, projects, steps, *depth, *outputJSON, stdout, stderr)
+		return showPlan(root, filterProjects(projects, *only), steps, *depth, *outputJSON, stdout, stderr)
 	}
 	if command == "status" {
 		return showStatus(root, projects, steps, *depth, *outputJSON, stdout, stderr)
 	}
 	if len(steps) == 0 {
+		if command == "doctor" && *outputJSON {
+			return writeJSON(doctorReport{Root: root, Ready: true, Projects: []Project{}, Diagnostics: []Diagnostic{}}, stdout, stderr)
+		}
 		printNoProjects(stdout, root, *depth)
 		return 0
 	}
 	if command == "doctor" || (command == "up" && !*dry) {
-		diagnostics := CheckEnvironment(root, projects, steps, exec.LookPath, ProbeVersion)
+		checkedProjects := projects
+		if *only != "" {
+			checkedProjects = filterProjects(projects, *only)
+		}
+		diagnostics := CheckEnvironment(root, checkedProjects, steps, exec.LookPath, ProbeVersion)
+		if command == "doctor" && *outputJSON {
+			code := writeJSON(doctorReport{Root: root, Ready: len(diagnostics) == 0, Projects: checkedProjects, Diagnostics: diagnostics}, stdout, stderr)
+			if code != 0 {
+				return code
+			}
+			if len(diagnostics) > 0 {
+				return 1
+			}
+			return 0
+		}
 		if command == "doctor" {
-			for _, p := range projects {
+			for _, p := range checkedProjects {
 				fmt.Fprintf(stdout, "✓ %s (%s) at %s\n", p.Manager, p.Ecosystem, p.Directory)
 			}
 		}

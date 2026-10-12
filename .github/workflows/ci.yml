@@ -23,7 +23,9 @@ jobs:
           cache: false
       - name: Check gofmt
         shell: bash
-        run: test -z "$(gofmt -l cmd/pkx internal/pkx)"
+        run: |
+          unformatted="$(gofmt -l cmd/pkx internal/pkx)"
+          if [ -n "$unformatted" ]; then echo "Unformatted Go files:"; echo "$unformatted"; exit 1; fi
       - name: Test
         run: go test ./...
       - name: Vet

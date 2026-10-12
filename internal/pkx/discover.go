@@ -3,7 +3,6 @@ package pkx
 import (
 	"fmt"
 	"io/fs"
-	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -147,15 +146,4 @@ func pythonManager(files map[string]bool) (string, string, error) {
 		return "pip", "requirements.txt", nil
 	}
 	return "", "", fmt.Errorf("pyproject.toml has no supported lockfile or requirements.txt; use uv, Poetry, or requirements.txt")
-}
-
-func readDir(path string) (bool, error) {
-	st, err := os.Stat(path)
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-	if err != nil {
-		return false, err
-	}
-	return st.IsDir(), nil
 }

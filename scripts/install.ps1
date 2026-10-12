@@ -8,11 +8,11 @@ param(
 )
 $ErrorActionPreference = "Stop"
 if ($Help) {
-    Write-Host "Usage: .\install.ps1 [-Version vX.Y.Z] [-InstallDir DIRECTORY] [-AddToPath]"
-    Write-Host "Downloads an official pkx release and verifies its SHA256."
-    Write-Host "Default: latest published release; installation directory: ~/.local/bin."
-    Write-Host "-AddToPath: persist the install directory in your Windows USER PATH (no admin)."
-    Write-Host "Open a NEW CMD/PowerShell window afterwards; existing windows keep their old PATH."
+    Write-Output "Usage: .\install.ps1 [-Version vX.Y.Z] [-InstallDir DIRECTORY] [-AddToPath]"
+    Write-Output "Downloads an official pkx release and verifies its SHA256."
+    Write-Output "Default: latest published release; installation directory: ~/.local/bin."
+    Write-Output "-AddToPath: persist the install directory in your Windows USER PATH (no admin)."
+    Write-Output "Open a NEW CMD/PowerShell window afterwards; existing windows keep their old PATH."
     exit 0
 }
 

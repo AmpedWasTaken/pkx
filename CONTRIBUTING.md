@@ -53,3 +53,7 @@ Fork the repository, push your branch and open a PR against `main` using the pro
 Security problems should **not** be reported with public exploit details: see [SECURITY.md](SECURITY.md). Be respectful in issues and reviews: see [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
 Contributed code is licensed under the repository's [MIT license](LICENSE). Contributors retain copyright in their work.
+
+## Release preparation
+
+Maintainers use [the releasing checklist](docs/RELEASING.md). Contributors do not need to create version tags or GitHub releases for ordinary pull requests.

@@ -61,6 +61,10 @@ pkx install --dry-run         # Preview without making changes
 
 > pkx invokes native package managers, which may execute third-party lifecycle scripts. Always inspect untrusted repositories and use `pkx plan` first. Runtime installation and the remote bundle marketplace are not implemented yet.
 
+## Try the example project
+
+Don't want to point pkx at a real repository yet? [`examples/mixed-language`](examples/mixed-language/README.md) is a small, committed fixture with a Node (`package.json`) and a PHP (`composer.json`) project side by side, no credentials and no generated dependency directories. Run `pkx scan`, `pkx status` and `pkx plan` from that directory to see what pkx detects and exactly what it would install.
+
 ## Roadmap
 
 <p align="center">

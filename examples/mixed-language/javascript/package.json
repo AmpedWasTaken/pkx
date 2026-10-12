@@ -1,0 +1,9 @@
+{
+  "name": "pkx-example-javascript",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Minimal Node fixture for the pkx mixed-language example. No dependencies are installed by default.",
+  "scripts": {
+    "start": "node -e \"console.log('hello from the pkx mixed-language example')\""
+  }
+}

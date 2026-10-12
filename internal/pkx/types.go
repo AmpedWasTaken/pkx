@@ -46,6 +46,11 @@ func relative(root, dir string) string {
 }
 
 func within(root, userPath string) (string, error) {
+	canonicalRoot, err := filepath.EvalSymlinks(root)
+	if err != nil {
+		return "", fmt.Errorf("resolve workspace: %w", err)
+	}
+	root = canonicalRoot
 	if userPath == "" || filepath.IsAbs(userPath) {
 		return "", fmt.Errorf("directory must be a relative path inside the workspace")
 	}

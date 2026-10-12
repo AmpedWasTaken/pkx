@@ -1,20 +1,20 @@
-<p align="center"><img src="assets/pkx-mark.svg" width="88" height="88" alt="pkx logo" /></p>
+<p align="center"><img src="assets/pkx-mark.svg" width="78" height="78" alt="pkx logo"></p>
+
 <h1 align="center">pkx — Package eXchange</h1>
-<p align="center"><strong>One command. Every ecosystem. Your existing package managers.</strong></p>
+<p align="center"><strong>One command. Every ecosystem.</strong></p>
+
 <p align="center">
-  <a href="https://github.com/AmpedWasTaken/pkx/actions/workflows/ci.yml"><img alt="CI status" src="https://github.com/AmpedWasTaken/pkx/actions/workflows/ci.yml/badge.svg" /></a>
-  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-blue.svg" /></a>
-  <a href="CONTRIBUTING.md"><img alt="Contributions welcome" src="https://img.shields.io/badge/contributions-welcome-58b7a6.svg" /></a>
-  <a href="https://github.com/AmpedWasTaken/pkx/issues"><img alt="Open issues" src="https://img.shields.io/github/issues/AmpedWasTaken/pkx" /></a>
+  <a href="https://github.com/AmpedWasTaken/pkx/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/AmpedWasTaken/pkx/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/AmpedWasTaken/pkx/releases"><img alt="GitHub release" src="https://img.shields.io/github/v/release/AmpedWasTaken/pkx"></a>
+  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-blue"></a>
+  <a href="CONTRIBUTING.md"><img alt="Contributions welcome" src="https://img.shields.io/badge/contributions-welcome-54e2d1"></a>
 </p>
-<p align="center">An open-source CLI for setting up mixed-language repositories.<br />No new dependency resolver. No replacement lockfiles. No required account.</p>
-<p align="center"><img src="assets/social-preview.svg" width="100%" alt="pkx: one command for every ecosystem" /></p>
 
-> **Version:** `v0.5.0` — first public **0.x** release candidate. The CLI is usable but its interfaces may change before v1.0. A remote bundle marketplace and automatic runtime installation do **not** exist yet.
+**pkx** is a cross-platform, open-source CLI that finds package managers in your repository and uses the native tools you already know. No custom dependency resolver, replacement lockfile, or required account.
 
-## Install in one command
+## Install in one line
 
-**No Go or npm is required to install pkx itself.** These commands install the published binary (with SHA256 archive verification), then set up your user PATH so you can type `pkx` from **any newly opened terminal**.
+Full instructions and copyable commands: **[pkx.ampedwastaken.dev](https://pkx.ampedwastaken.dev)** ([website source](https://github.com/AmpedWasTaken/pkx-website)).
 
 **Windows — CMD or PowerShell**
 
@@ -22,143 +22,58 @@
 powershell -NoProfile -ExecutionPolicy Bypass -Command "& ([scriptblock]::Create((irm 'https://pkx.ampedwastaken.dev/install.ps1'))) -AddToPath"
 ```
 
-**macOS / Linux — Bash or Zsh**
+**macOS / Linux**
 
 ```sh
 curl -fsSL https://pkx.ampedwastaken.dev/install.sh | sh -s -- --add-to-path
 ```
 
-**After installation:** Close your current terminal, open a **new** CMD, PowerShell, Bash or Zsh window and run:
+The installers fetch the official release binaries, check their SHA256 against the release checksum file, and set up a **user-level PATH**. Close the terminal and open a new one:
 
 ```sh
 pkx version
-pkx status
-pkx plan
 ```
 
-The Windows command installs to `%USERPROFILE%\.local\bin` and updates **only your user PATH**; it never needs administrator rights. The macOS/Linux command installs to `~/.local/bin` and adds it to your Bash/Zsh startup file. You still need the native package managers (such as Node/npm or PHP/Composer) for projects that use them.
+pkx itself doesn't need Go or npm. Your projects still need their underlying package managers. **Review remotely hosted installers before executing them** or [download and verify a release manually](https://github.com/AmpedWasTaken/pkx/releases). See [installation and PATH troubleshooting](docs/GETTING_STARTED.md).
 
-The scripts are available to inspect at **[pkx.ampedwastaken.dev](https://pkx.ampedwastaken.dev)**: [Windows source](https://pkx.ampedwastaken.dev/install.ps1) · [Unix source](https://pkx.ampedwastaken.dev/install.sh). Executing any remotely hosted install script involves trusting the source and HTTPS host; review it first if you prefer. The installer checks the official GitHub archive against the release checksum file.
+## Get started
 
-<details><summary><strong>Manual installation / Go install / PATH troubleshooting</strong></summary>
+Run these commands from the root of any supported repository:
 
-Download your OS archive and `SHA256SUMS` from [GitHub Releases](https://github.com/AmpedWasTaken/pkx/releases/tag/v0.5.0), verify the checksum, and extract `pkx.exe` on Windows or `pkx` on Unix. Place it in an existing PATH directory, or add its folder to PATH.
+```sh
+pkx scan          # Detect manifests and package managers
+pkx status        # Check your environment
+pkx plan          # Preview exactly what will execute
+pkx up            # Install dependencies using native tools
+```
 
-Windows manual default: `%USERPROFILE%\.local\bin`. Open **Edit environment variables for your account → Path → New**, enter that directory, and open a new terminal. Check with `where pkx` in CMD or `Get-Command pkx` in PowerShell.
+For everyday work:
 
-macOS/Linux manual default: `~/.local/bin`. Put `export PATH="$HOME/.local/bin:$PATH"` in `~/.zprofile` (macOS Zsh) or `~/.bashrc` (Linux Bash). Open a new terminal and check with `command -v pkx`.
+```sh
+pkx add axios                 # Add a dependency to a Node project
+pkx add vite --dev            # Add development dependency
+pkx run dev                   # Run a declared project script
+pkx doctor                    # Diagnose missing tools
+pkx install --dry-run         # Preview without making changes
+```
 
-Already have Go 1.23+? `go install github.com/AmpedWasTaken/pkx/cmd/pkx@v0.5.0` works if `$(go env GOPATH)/bin` (or `GOBIN`) is on PATH.
+**Supported installation managers:** npm, pnpm, Yarn, Bun, pip, uv, Poetry, Composer, Cargo, and Go modules. `add`, `remove`, and `run` currently support Node managers and Composer. See [compatibility details](docs/GETTING_STARTED.md#supported-managers-and-behavior).
 
-If the one-liner fails, inspect `scripts/install.ps1` or `scripts/install.sh` in the repository and follow [the full troubleshooting guide](docs/GETTING_STARTED.md). The v0.5.0 binary release stays immutable; the installer website follows reviewed `main` updates.
+> pkx invokes native package managers, which may execute third-party lifecycle scripts. Always inspect untrusted repositories and use `pkx plan` first. Runtime installation and the remote bundle marketplace are not implemented yet.
 
-</details>
-
-## Development status
+## Roadmap
 
 <p align="center">
-  <a href="https://github.com/AmpedWasTaken/pkx/releases/tag/v0.5.0"><img src="assets/badge-core.svg" alt="Core CLI: v0.5.0 shipped" /></a>
-  <a href="https://github.com/AmpedWasTaken/pkx/issues/12"><img src="assets/badge-marketplace.svg" alt="Bundle marketplace: design proposal" /></a>
-  <a href="https://github.com/AmpedWasTaken/pkx/issues/14"><img src="assets/badge-runtimes.svg" alt="Automatic runtime bootstrap: design proposal" /></a>
+  <a href="docs/ROADMAP.md"><img src="assets/roadmap.svg" width="100%" alt="pkx roadmap: core CLI shipped; reliability, developer experience, bundle marketplace and runtime bootstrap planned"></a>
 </p>
-<p align="center"><a href="docs/ROADMAP.md"><img src="assets/roadmap.svg" width="100%" alt="pkx roadmap: core CLI shipped, reliability next, developer UX planned, remote marketplace and runtime bootstrap under design" /></a></p>
 
-**The graphic shows milestone states, not measured percentages or a release schedule.** It is updated manually as work is completed. Follow [the roadmap](docs/ROADMAP.md), [open feature issues](https://github.com/AmpedWasTaken/pkx/issues) and [the bundle marketplace](docs/rfcs/0001-bundle-registry.md) / [runtime bootstrap](docs/rfcs/0002-runtime-bootstrap.md) proposals. The marketplace and automatic runtime installation are **not implemented yet**.
+The roadmap uses qualitative milestones, not made-up completion percentages. [See the full roadmap](docs/ROADMAP.md) or [help build an upcoming feature](https://github.com/AmpedWasTaken/pkx/issues).
 
-## Why pkx?
+## Contribute
 
-A repo can have a JavaScript frontend, a PHP backend and Python scripts. Getting started often means figuring out which package manager belongs in which folder, matching runtime versions and remembering install commands. **pkx finds those projects and delegates to their native tools.**
+pkx is MIT-licensed and community-driven. Contributions to tests, platform support, adapters, documentation and usability are welcome.
 
-```sh
-cd your-project
-pkx status  # See detected projects, lockfiles and missing tools
-pkx plan    # Preview native commands; makes no changes
-pkx up      # Check the environment, then install dependencies
-```
-
-`pkx up` runs native package managers with your permissions; their lifecycle scripts may execute third-party code. Review untrusted repositories and use `pkx plan` first.
-
-## Everyday commands
-
-| Command | What it does |
-| --- | --- |
-| `pkx status` | Explain what's in this workspace and which tools are missing |
-| `pkx plan` | Preview native install commands **without** running them |
-| `pkx up` | Check the environment and install via native managers |
-| `pkx doctor` | Diagnose missing/incompatible runtimes (`--json` supported) |
-| `pkx scan` / `pkx ls` | Discover existing projects (`--json` supported) |
-| `pkx install` / `pkx i` | Install without runtime-version preflight (`--dry-run` supported) |
-| `pkx add axios` | Add packages via the detected native manager (`--dev`, `--dry-run`) |
-| `pkx remove axios` / `pkx rm axios` | Remove packages through the native manager |
-| `pkx run dev` | Run a declared Node/Composer script and forward optional arguments after `--` |
-| `pkx plan --only node` | Preview one ecosystem/manager |
-| `pkx init` | Create an empty local `pkx.json` bundle manifest |
-| `pkx bundle install pkx.json --dry-run` | Preview **explicit** dependency additions |
-| `pkx completion bash` | Generate shell completion (`zsh`, `fish`, `powershell` also supported) |
-| `pkx help plan` | Show help for one command |
-
-Supports npm, pnpm, Yarn, Bun, pip, uv, Poetry, Composer, Cargo and Go modules. See [exact compatibility details](docs/GETTING_STARTED.md#supported-managers-and-behavior). Existing lockfiles remain authoritative.
-
-## Manage packages and run scripts
-
-These commands use the project’s **existing** package manager. Supported for npm, pnpm, Yarn, Bun and Composer; they do not create a separate pkx lockfile.
-
-```sh
-pkx add axios --dry-run          # Preview first; nothing executes
-pkx add axios zod                # Add dependencies
-pkx add vite --dev               # Add development dependencies
-pkx remove axios                 # Remove native dependencies
-pkx run dev                      # Run a declared project script
-pkx run dev -- --host 127.0.0.1 # Forward arguments to the script
-```
-
-With multiple matching projects, pkx **refuses to guess** where packages should go. Choose a project explicitly:
-
-```sh
-pkx add axios --project frontend
-pkx run test --project backend
-pkx add laravel/sanctum --project backend --manager composer
-```
-
-`--project` is relative to `--dir` (default `.`); `--manager` filters the ecosystem. `pkx run` only runs a script defined in `package.json` or `composer.json`, and suggests available scripts if its name is unknown. Add/remove for pip, Cargo and Go are not supported yet. All changes go through native package managers, which may execute untrusted installation hooks or scripts. Preview with `--dry-run` before working with unfamiliar repositories.
-
-## Local dependency bundles
-
-Bundles share a *list of dependencies*, not a new package format. `pkx init` creates a manifest with **no packages**. Add entries for existing project directories, preview them, and install explicitly:
-
-```json
-{
-  "schema": 1,
-  "name": "web-starter",
-  "packages": [
-    { "manager": "pnpm", "directory": "frontend", "dependencies": ["vue", "axios"], "devDependencies": ["vite"] },
-    { "manager": "composer", "directory": "backend", "dependencies": ["laravel/sanctum"] }
-  ]
-}
-```
-
-```sh
-pkx bundle install pkx.json --dry-run
-pkx bundle install pkx.json
-```
-
-Directories must exist inside the workspace. Bundle installation may modify manifests and native lockfiles. There is **no hosted registry** in this preview.
-
-## Built with contributors
-
-pkx is MIT licensed and developed in the open. Bug fixes, tests, documentation, platform reports and new adapter proposals are welcome. You can fix a typo immediately; for larger behavior changes, start with an issue so the design stays maintainable.
-
-- **[Contributing](CONTRIBUTING.md)** — how to set up, test and submit a PR
-- **[Good first issues](https://github.com/AmpedWasTaken/pkx/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)** · **[All issues](https://github.com/AmpedWasTaken/pkx/issues)** — choose a task or report friction
-- **[Roadmap](docs/ROADMAP.md)** · **[Architecture](docs/ARCHITECTURE.md)** — project scope and decisions
-- **[Changelog](CHANGELOG.md)** · **[Release notes](docs/releases/v0.5.0.md)** · **[Release process](docs/RELEASING.md)** — versions, packages and verification
-- **[Support](SUPPORT.md)** · **[Code of conduct](CODE_OF_CONDUCT.md)** · **[Security](SECURITY.md)**
-
-If pkx helps in your own repo, **try it and open an issue with a reproducible case**. Real-world layouts and platform-specific issues are especially useful. Stars are appreciated, but good reports and PRs matter more.
-
-## Scope and safety
-
-pkx does **not** install system runtimes, run a daemon, collect telemetry, guarantee native installation success or automatically roll back file changes. `status` checks tool readiness rather than installed dependencies; `plan` previews commands, not their downstream effects. Cargo and Go steps download dependencies without building. Read [design principles](docs/ARCHITECTURE.md) and [security notes](SECURITY.md).
+**[Contributing guide](CONTRIBUTING.md)** · **[Good first issues](https://github.com/AmpedWasTaken/pkx/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)** · **[Architecture](docs/ARCHITECTURE.md)** · **[Changelog](CHANGELOG.md)** · **[Security](SECURITY.md)**
 
 ---
-<sub>Maintained by <a href="https://github.com/AmpedWasTaken">AmpedWasTaken</a> with contributions welcome. MIT licensed.</sub>
+<sub>Made by <a href="https://github.com/AmpedWasTaken">AmpedWasTaken</a> and open-source contributors.</sub>

@@ -149,7 +149,19 @@ func universalInstallSteps(root string, project Project, packages []string, dev 
 }
 
 func runUniversalInstall(ctx context.Context, args []string, stdout, stderr io.Writer) int {
-	opts, packages, _, err := parseManageArgs("add", args)
+	var confirm, skipCheck bool
+	var filtered []string
+	for _, arg := range args {
+		switch arg {
+		case "--yes":
+			confirm = true
+		case "--skip-registry-check":
+			skipCheck = true
+		default:
+			filtered = append(filtered, arg)
+		}
+	}
+	opts, packages, _, err := parseManageArgs("add", filtered)
 	if err != nil {
 		fmt.Fprintf(stderr, "pkx: install PACKAGE... [--dir PATH] [--project DIR] [--manager MANAGER] [--dev] [--dry-run]: %v\n", err)
 		return 2
@@ -169,14 +181,39 @@ func runUniversalInstall(ctx context.Context, args []string, stdout, stderr io.W
 		fmt.Fprintf(stderr, "pkx: %v\n", err)
 		return 1
 	}
-	steps, err := universalInstallSteps(root, project, packages, opts.Dev)
+	// The catalog is pinned into the reviewed binary. Dry-run never hits a
+	// registry; actual installs verify the resolved package's existence.
+	finalPackages, resolution, err := resolveAndCheckPackages(ctx, project, packages, !opts.DryRun && !skipCheck)
+	if err != nil {
+		fmt.Fprintf(stderr, "pkx: %v\n", err)
+		return 1
+	}
+	steps, err := universalInstallSteps(root, project, finalPackages, opts.Dev)
 	if err != nil {
 		fmt.Fprintf(stderr, "pkx: %v\n", err)
 		return 2
 	}
 	fmt.Fprintf(stdout, "Detected %s project using %s at %s.\n", project.Ecosystem, project.Manager, project.Directory)
+	needsApproval := false
+	for _, match := range resolution {
+		if match.Alternative {
+			needsApproval = true
+			fmt.Fprintf(stdout, "Resolved %q → %q (%s; same purpose, different API).\n", match.Requested, match.Package, match.Capability)
+		} else {
+			fmt.Fprintf(stdout, "Selected %q for %s.\n", match.Package, project.Ecosystem)
+		}
+	}
 	if project.Manager == "pip" {
-		fmt.Fprintln(stdout, "Note: pip install does not update requirements.txt; record the dependency there for reproducible setup.")
+		fmt.Fprintln(stdout, "Note: pip install does not update requirements.txt; record the dependency for reproducible setup.")
+	}
+	if opts.DryRun {
+		fmt.Fprintln(stdout, "Dry-run uses reviewed capability mappings; registry existence is checked during actual installation.")
+	} else if needsApproval && !confirm && !approveAlternative(os.Stdin, stdout) {
+		fmt.Fprintln(stderr, "pkx: alternative not approved; nothing installed. For unattended automation use --yes after reviewing the mapping.")
+		return 1
+	}
+	if skipCheck {
+		fmt.Fprintln(stdout, "Warning: --skip-registry-check disables official registry existence checks; useful only for trusted private registries.")
 	}
 	return execute(ctx, root, steps, opts.DryRun, stdout, stderr)
 }

@@ -3,36 +3,93 @@ name: Release binaries
 on:
   push:
     tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to publish from main (vX.Y.Z)"
+        required: true
+        type: string
+        default: "v0.5.0"
 
 permissions:
   contents: write
 
+concurrency:
+  group: "release-${{ inputs.version || github.ref_name }}"
+  cancel-in-progress: false
+
 jobs:
-  binaries:
+  release:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: go.mod
           cache: false
-      - name: Test
-        run: go test ./...
-      - name: Build archives
+      - name: Validate tag and source
+        shell: bash
+        env:
+          RELEASE_TAG: "${{ inputs.version || github.ref_name }}"
+        run: |
+          set -euo pipefail
+          if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Use a stable semver tag such as v0.5.0"
+            exit 1
+          fi
+          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" && "$GITHUB_REF" != "refs/heads/main" ]]; then
+            echo "::error::Manual releases must run from main"
+            exit 1
+          fi
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::Release commit must be contained in main"
+            exit 1
+          fi
+          version=$(sed -n 's/^var Version = "\([^"]*\)"/\1/p' internal/pkx/types.go)
+          if [[ "$version" != "${RELEASE_TAG#v}" ]]; then
+            echo "::error::Code version $version does not match release $RELEASE_TAG"
+            exit 1
+          fi
+          if [[ ! -f "docs/releases/${RELEASE_TAG}.md" ]]; then
+            echo "::error::Missing release notes for $RELEASE_TAG"
+            exit 1
+          fi
+
+      - name: Verify source and smoke test
         shell: bash
         run: |
           set -euo pipefail
+          test -z "$(gofmt -l cmd internal)"
+          go test ./...
+          go test -race ./...
+          go vet ./...
+          sh -n scripts/install.sh
+          bash scripts/smoke.sh
+
+      - name: Build and inspect archives
+        shell: bash
+        env:
+          RELEASE_TAG: "${{ inputs.version || github.ref_name }}"
+        run: |
+          set -euo pipefail
           mkdir -p dist stage
-          version="${GITHUB_REF_NAME#v}"
+          version="${RELEASE_TAG#v}"
           for os in linux darwin windows; do
             for arch in amd64 arm64; do
               file="pkx"
-              if [ "$os" = windows ]; then file="pkx.exe"; fi
+              if [[ "$os" == "windows" ]]; then file="pkx.exe"; fi
               GOOS="$os" GOARCH="$arch" CGO_ENABLED=0 go build -trimpath \
                 -ldflags="-s -w -X github.com/AmpedWasTaken/pkx/internal/pkx.Version=$version" \
                 -o "stage/$file" ./cmd/pkx
-              name="pkx_${GITHUB_REF_NAME}_${os}_${arch}"
-              if [ "$os" = windows ]; then
+              name="pkx_${RELEASE_TAG}_${os}_${arch}"
+              if [[ "$os" == "linux" && "$arch" == "amd64" ]]; then
+                [[ "$(stage/pkx version)" == "pkx $version" ]]
+              fi
+              if [[ "$os" == "windows" ]]; then
                 (cd stage && zip -q "../dist/${name}.zip" "$file")
               else
                 tar -czf "dist/${name}.tar.gz" -C stage "$file"
@@ -40,12 +97,42 @@ jobs:
               rm -f "stage/$file"
             done
           done
-          (cd dist && sha256sum ./* > SHA256SUMS)
+          (
+            cd dist
+            sha256sum ./* > SHA256SUMS
+            sha256sum -c SHA256SUMS
+            for asset in *.tar.gz; do
+              [[ "$(tar -tzf "$asset")" == "pkx" ]]
+            done
+            for asset in *.zip; do
+              [[ "$(unzip -Z -1 "$asset")" == "pkx.exe" ]]
+            done
+            [[ "$(find . -maxdepth 1 -name 'pkx_*' -type f | wc -l)" -eq 6 ]]
+          )
+
       - name: Publish GitHub release
+        shell: bash
         env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" dist/* --generate-notes --verify-tag
+          GH_TOKEN: "${{ github.token }}"
+          RELEASE_TAG: "${{ inputs.version || github.ref_name }}"
+        run: |
+          set -euo pipefail
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            echo "::error::Release $RELEASE_TAG already exists; will not overwrite it"
+            exit 1
+          fi
+          note="docs/releases/${RELEASE_TAG}.md"
+          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
+            gh release create "$RELEASE_TAG" dist/* \
+              --target "$GITHUB_SHA" --title "pkx $RELEASE_TAG" --notes-file "$note"
+          else
+            gh release create "$RELEASE_TAG" dist/* \
+              --verify-tag --title "pkx $RELEASE_TAG" --notes-file "$note"
+          fi
+
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
         with:
-          name: pkx-binaries
+          name: pkx-release-assets
           path: dist/
+          if-no-files-found: ignore

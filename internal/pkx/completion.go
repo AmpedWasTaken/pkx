@@ -36,13 +36,14 @@ _pkx_complete() {
   prev="${COMP_WORDS[COMP_CWORD-1]}"
   subcommand="${COMP_WORDS[1]}"
   case "$prev" in
-    --dir) COMPREPLY=( $(compgen -d -- "$cur") ); return ;;
+    --dir|--project) COMPREPLY=( $(compgen -d -- "$cur") ); return ;;
+    --manager) COMPREPLY=( $(compgen -W 'npm pnpm yarn bun composer' -- "$cur") ); return ;;
     --depth) return ;;
     --only) COMPREPLY=( $(compgen -W 'node npm pnpm yarn bun php composer python pip uv poetry rust cargo go' -- "$cur") ); return ;;
     completion) COMPREPLY=( $(compgen -W 'bash zsh fish powershell' -- "$cur") ); return ;;
   esac
   if [[ "$COMP_CWORD" -eq 1 ]]; then
-    COMPREPLY=( $(compgen -W 'status plan up scan install doctor bundle init version completion help ls i' -- "$cur") )
+    COMPREPLY=( $(compgen -W 'status plan up scan install add remove run doctor bundle init version completion help ls i rm' -- "$cur") )
     return
   fi
   if [[ "$subcommand" == bundle && "$COMP_CWORD" -eq 2 ]]; then
@@ -50,7 +51,7 @@ _pkx_complete() {
     return
   fi
   if [[ "$cur" == -* ]]; then
-    COMPREPLY=( $(compgen -W '--dir --depth --only --dry-run --json --help' -- "$cur") )
+    COMPREPLY=( $(compgen -W '--dir --depth --only --project --manager --dev --dry-run --json --help' -- "$cur") )
   fi
 }
 complete -F _pkx_complete pkx
@@ -59,14 +60,15 @@ complete -F _pkx_complete pkx
 const zshCompletion = `#compdef pkx
 _pkx() {
   local -a commands managers
-  commands=(status plan up scan install doctor bundle init version completion help ls i)
+  commands=(status plan up scan install add remove run doctor bundle init version completion help ls i rm)
   managers=(node npm pnpm yarn bun php composer python pip uv poetry rust cargo go)
   if (( CURRENT == 2 )); then
     _describe 'pkx command' commands
     return
   fi
   case "$words[CURRENT-1]" in
-    --dir) _files -/; return ;;
+    --dir|--project) _files -/; return ;;
+    --manager) compadd npm pnpm yarn bun composer; return ;;
     --only) _describe 'package manager' managers; return ;;
     completion) compadd bash zsh fish powershell; return ;;
   esac
@@ -74,16 +76,19 @@ _pkx() {
     compadd init install
     return
   fi
-  _arguments '*: :((--dir --depth --only --dry-run --json --help))'
+  _arguments '*: :((--dir --depth --only --project --manager --dev --dry-run --json --help))'
 }
 compdef _pkx pkx
 `
 
 const fishCompletion = `# pkx fish completion
 complete -c pkx -f
-complete -c pkx -n '__fish_use_subcommand' -a 'status plan up scan install doctor bundle init version completion help ls i'
+complete -c pkx -n '__fish_use_subcommand' -a 'status plan up scan install add remove run doctor bundle init version completion help ls i rm'
 complete -c pkx -n '__fish_seen_subcommand_from bundle' -a 'init install'
 complete -c pkx -n '__fish_seen_subcommand_from completion' -a 'bash zsh fish powershell'
+complete -c pkx -l project -r -F
+complete -c pkx -l manager -r -a 'npm pnpm yarn bun composer'
+complete -c pkx -l dev
 complete -c pkx -l dir -r -F
 complete -c pkx -l depth -r
 complete -c pkx -l only -r -a 'node npm pnpm yarn bun php composer python pip uv poetry rust cargo go'
@@ -98,12 +103,13 @@ Register-ArgumentCompleter -Native -CommandName pkx -ScriptBlock {
     $words = @($commandAst.CommandElements | ForEach-Object { $_.Extent.Text })
     $previous = if ($words.Count -ge 2) { $words[$words.Count - 2] } else { '' }
     $options = switch ($previous) {
+        '--manager' { @('npm','pnpm','yarn','bun','composer'); break }
         '--only' { @('node','npm','pnpm','yarn','bun','php','composer','python','pip','uv','poetry','rust','cargo','go'); break }
         'completion' { @('bash','zsh','fish','powershell'); break }
         'bundle' { @('init','install'); break }
         default {
             if ($words.Count -le 2) { @('status','plan','up','scan','install','doctor','bundle','init','version','completion','help','ls','i') }
-            else { @('--dir','--depth','--only','--dry-run','--json','--help') }
+            else { @('--dir','--depth','--only','--project','--manager','--dev','--dry-run','--json','--help') }
         }
     }
     foreach ($option in $options) {

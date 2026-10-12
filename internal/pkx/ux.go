@@ -10,6 +10,9 @@ import (
 )
 
 var commandHelp = map[string]string{
+	"add":     "pkx add PACKAGE... [--dir PATH] [--project DIR] [--manager MANAGER] [--dev] [--dry-run]\n  Add dependencies with the detected npm/pnpm/Yarn/Bun/Composer manager.\n  If multiple projects match, select one with --project.\n",
+	"remove":  "pkx remove PACKAGE... [--dir PATH] [--project DIR] [--manager MANAGER] [--dry-run]\n  Remove dependencies using the native project manager. Shortcut: pkx rm.\n",
+	"run":     "pkx run SCRIPT [--dir PATH] [--project DIR] [--manager MANAGER] [--dry-run] [-- ARGS...]\n  Run a script declared in package.json or composer.json.\n  Example: pkx run dev -- --host 127.0.0.1\n",
 	"status":     "pkx status [--dir PATH] [--depth N] [--json]\n  Show detected projects, lockfiles, planned steps, and environment issues.\n  Reads project files and checks installed tool versions; changes nothing.\n",
 	"plan":       "pkx plan [--dir PATH] [--depth N] [--only MANAGER] [--json]\n  Preview the exact native install commands, without installing anything.\n  Use --json to integrate with scripts and editors.\n",
 	"scan":       "pkx scan [--dir PATH] [--depth N] [--json]\n  List projects detected under PATH. 'pkx ls' is a shortcut.\n",
@@ -26,6 +29,8 @@ func canonicalCommand(command string) string {
 	switch command {
 	case "i":
 		return "install"
+	case "rm":
+		return "remove"
 	case "ls", "list":
 		return "scan"
 	default:
@@ -56,7 +61,7 @@ func showHelp(command string, stdout, stderr io.Writer) int {
 func closestCommand(value string) string {
 	value = strings.ToLower(value)
 	closest, score := "", 3
-	for _, name := range []string{"scan", "status", "plan", "up", "install", "doctor", "bundle", "init", "version", "completion"} {
+	for _, name := range []string{"scan", "status", "plan", "up", "install", "add", "remove", "run", "doctor", "bundle", "init", "version", "completion"} {
 		distance := editDistance(value, name)
 		if distance < score {
 			closest, score = name, distance

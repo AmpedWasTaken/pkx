@@ -16,24 +16,24 @@ const packageAPI = "https://pkx.ampedwastaken.dev/api/packages"
 const packageSearchLimit = 1024 * 1024
 
 type PackageResult struct {
-	ID          string  \`json:"id"\`
-	Ecosystem   string  \`json:"ecosystem"\`
-	Manager     string  \`json:"manager"\`
-	Name        string  \`json:"name"\`
-	Description string  \`json:"description"\`
-	Version     *string \`json:"version"\`
-	RegistryURL string  \`json:"registryUrl"\`
-	Downloads   *int64  \`json:"downloads"\`
-	Command     []string \`json:"command,omitempty"\`
-	Project     string   \`json:"project,omitempty"\`
+	ID          string  `json:"id"`
+	Ecosystem   string  `json:"ecosystem"`
+	Manager     string  `json:"manager"`
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	Version     *string `json:"version"`
+	RegistryURL string  `json:"registryUrl"`
+	Downloads   *int64  `json:"downloads"`
+	Command     []string `json:"command,omitempty"`
+	Project     string   `json:"project,omitempty"`
 }
 
 type packageSearchResponse struct {
-	Query     string          \`json:"query"\`
-	Ecosystem string          \`json:"ecosystem"\`
-	Results   []PackageResult \`json:"results"\`
-	Warnings  []string        \`json:"warnings"\`
-	Source    string          \`json:"source"\`
+	Query     string          `json:"query"`
+	Ecosystem string          `json:"ecosystem"`
+	Results   []PackageResult `json:"results"`
+	Warnings  []string        `json:"warnings"`
+	Source    string          `json:"source"`
 }
 
 type packageSearchOptions struct {

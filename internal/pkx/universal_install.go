@@ -12,21 +12,7 @@ import (
 )
 
 var npmPackageName = regexp.MustCompile(`^(?:@[a-z0-9][a-z0-9._~-]*/)?[a-z0-9][a-z0-9._~-]*$`)
-var commonPackageName = regexp.MustCompile(`(?i)^[a-z0-9][a-z0-9._-]*package pkx
-
-import (
-	"context"
-	"fmt"
-	"io"
-	"os"
-	"path/filepath"
-	"regexp"
-	"sort"
-	"strings"
-)
-
-var npmPackageName = regexp.MustCompile(`^(?:@[a-z0-9][a-z0-9._~-]*/)?[a-z0-9][a-z0-9._~-]*$`)
-)
+var commonPackageName = regexp.MustCompile(`(?i)^[a-z0-9][a-z0-9._-]*$`)
 var composerPackageName = regexp.MustCompile(`^[a-z0-9][a-z0-9._-]*/[a-z0-9][a-z0-9._-]*$`)
 var goModuleName = regexp.MustCompile(`^[a-z0-9][a-z0-9.-]*\.[a-z]{2,}(?:/[a-z0-9][a-z0-9._~+-]*)+$`)
 

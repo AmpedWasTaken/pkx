@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-const Version = "0.1.0"
+var Version = "0.2.0-dev"
 
 type Project struct {
 	Directory string `json:"directory"`
@@ -49,14 +49,8 @@ func within(root, userPath string) (string, error) {
 	if userPath == "" || filepath.IsAbs(userPath) {
 		return "", fmt.Errorf("directory must be a relative path inside the workspace")
 	}
-	// Canonicalize the workspace before comparing paths: on macOS /var can
-	// resolve to /private/var, and Windows may normalize junctions or casing.
-	canonicalRoot, err := filepath.EvalSymlinks(root)
-	if err != nil {
-		return "", fmt.Errorf("workspace: %w", err)
-	}
-	abs := filepath.Join(canonicalRoot, filepath.Clean(userPath))
-	rel, err := filepath.Rel(canonicalRoot, abs)
+	abs := filepath.Join(root, filepath.Clean(userPath))
+	rel, err := filepath.Rel(root, abs)
 	if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
 		return "", fmt.Errorf("directory %q is outside the workspace", userPath)
 	}
@@ -64,7 +58,7 @@ func within(root, userPath string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("directory %q: %w", userPath, err)
 	}
-	check, err := filepath.Rel(canonicalRoot, resolved)
+	check, err := filepath.Rel(root, resolved)
 	if err != nil || check == ".." || strings.HasPrefix(check, ".."+string(filepath.Separator)) {
 		return "", fmt.Errorf("directory %q resolves outside the workspace", userPath)
 	}
@@ -79,11 +73,11 @@ func within(root, userPath string) (string, error) {
 }
 
 func readJSON(path string, value any) error {
-	data, err := os.ReadFile(path)
+	b, err := os.ReadFile(path)
 	if err != nil {
 		return err
 	}
-	if err := json.Unmarshal(data, value); err != nil {
+	if err := json.Unmarshal(b, value); err != nil {
 		return fmt.Errorf("%s: %w", path, err)
 	}
 	return nil

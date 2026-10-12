@@ -1,11 +1,11 @@
-name: Build release binaries
+name: Release binaries
 
 on:
   push:
     tags: ["v*"]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   binaries:
@@ -18,18 +18,33 @@ jobs:
           cache: false
       - name: Test
         run: go test ./...
-      - name: Build cross-platform binaries
+      - name: Build archives
         shell: bash
         run: |
-          mkdir -p dist
+          set -euo pipefail
+          mkdir -p dist stage
+          version="${GITHUB_REF_NAME#v}"
           for os in linux darwin windows; do
             for arch in amd64 arm64; do
-              suffix=""
-              if [ "$os" = windows ]; then suffix=".exe"; fi
-              GOOS="$os" GOARCH="$arch" CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o "dist/pkx_${os}_${arch}${suffix}" ./cmd/pkx
+              file="pkx"
+              if [ "$os" = windows ]; then file="pkx.exe"; fi
+              GOOS="$os" GOARCH="$arch" CGO_ENABLED=0 go build -trimpath \
+                -ldflags="-s -w -X github.com/AmpedWasTaken/pkx/internal/pkx.Version=$version" \
+                -o "stage/$file" ./cmd/pkx
+              name="pkx_${GITHUB_REF_NAME}_${os}_${arch}"
+              if [ "$os" = windows ]; then
+                (cd stage && zip -q "../dist/${name}.zip" "$file")
+              else
+                tar -czf "dist/${name}.tar.gz" -C stage "$file"
+              fi
+              rm -f "stage/$file"
             done
           done
-          cd dist && sha256sum * > SHA256SUMS
+          (cd dist && sha256sum ./* > SHA256SUMS)
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/* --generate-notes --verify-tag
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: pkx-binaries

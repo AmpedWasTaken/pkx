@@ -2,7 +2,7 @@
 
 This is a **direction, not a delivery promise**. Features and priorities can change based on testing, contributor availability and feedback. The current implementation is the source of truth.
 
-## In the v0.5 release candidate
+## Shipped in v0.5.0
 
 - Multi-ecosystem discovery and native install planning
 - `status`, `plan`, `doctor`, `up`, JSON output and CLI aliases
@@ -21,6 +21,20 @@ This is a **direction, not a delivery promise**. Features and priorities can cha
 | Developer experience | Helpful failures and simple first-run instructions | UX feedback on fresh clones |
 | Release reliability | Downloadable, verifiable binaries with documented support | Installation testing on each OS |
 | Compatibility | Honest, tested version pin and workspace support | Native-manager test fixtures |
+
+## Feature proposals and community issues
+
+The roadmap illustration in the README uses **shipped**, **next**, **planned** and **design** milestones. This is qualitative status, not percentage completion; no date is promised.
+
+| Area | Status | Where to contribute |
+| --- | --- | --- |
+| Reliability and runtime pin tests | Next | [#6](https://github.com/AmpedWasTaken/pkx/issues/6) |
+| Real mixed-language example | Next | [#5](https://github.com/AmpedWasTaken/pkx/issues/5) |
+| Script discovery and monorepo selection | Planned | [#16](https://github.com/AmpedWasTaken/pkx/issues/16), [#17](https://github.com/AmpedWasTaken/pkx/issues/17) |
+| **Remote bundle marketplace** | Design only; no remote service or remote bundle installs | [RFC 0001](rfcs/0001-bundle-registry.md), [#12](https://github.com/AmpedWasTaken/pkx/issues/12), [#13](https://github.com/AmpedWasTaken/pkx/issues/13) |
+| **Automatic runtime installation** | Design only; no runtime install execution | [RFC 0002](rfcs/0002-runtime-bootstrap.md), [#14](https://github.com/AmpedWasTaken/pkx/issues/14), [#15](https://github.com/AmpedWasTaken/pkx/issues/15) |
+
+**Technical starting points:** [offline registry catalog fixture](../examples/registry/catalog.v1.json) and [non-executable runtime plan fixture](../examples/runtime/bootstrap-plan.v1.json). They are examples used to discuss and validate future interfaces, **not available CLI features**.
 
 ## Potential ideas — not shipped
 

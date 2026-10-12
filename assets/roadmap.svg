@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="540" viewBox="0 0 1000 540" role="img" aria-labelledby="title desc">
+<title id="title">pkx development roadmap</title>
+<desc id="desc">v0.5.0 core CLI shipped. Reliability work is next. Developer experience is planned. Remote bundle marketplace and automatic runtime bootstrap have RFC designs, not released implementations.</desc>
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#111A2B"/><stop offset="1" stop-color="#0B1220"/></linearGradient>
+<linearGradient id="edge" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#7C91FF"/><stop offset="1" stop-color="#54E2D1"/></linearGradient>
+</defs>
+<rect width="1000" height="540" rx="22" fill="url(#bg)"/>
+<rect x="1" y="1" width="998" height="538" rx="21" fill="none" stroke="#33415B" stroke-width="2"/>
+<path d="M31 96 H969" stroke="url(#edge)" stroke-width="2" stroke-opacity=".8"/>
+<text x="32" y="53" font-size="30" font-weight="750" font-family="Inter,Segoe UI,Arial,sans-serif" fill="#F0F5FF">pkx roadmap</text>
+<text x="32" y="79" font-size="15" font-family="Inter,Segoe UI,Arial,sans-serif" fill="#A5B5CE">One command. Every ecosystem.</text>
+<text x="967" y="52" text-anchor="end" font-size="13" font-family="Inter,Segoe UI,Arial,sans-serif" fill="#54E2D1">Milestone status</text>
+<text x="967" y="74" text-anchor="end" font-size="12" font-family="Inter,Segoe UI,Arial,sans-serif" fill="#8FA4C2">not a percentage claim</text>
+<g>
+<rect x="30" y="128" width="940" height="64" rx="13" fill="#182338" stroke="#34425c"/>
+<rect x="43" y="139" width="92" height="42" rx="9" fill="#54E2D1" fill-opacity=".14"/>
+<text x="89" y="165" text-anchor="middle" font-size="14" font-weight="700" font-family="Inter,Segoe UI,Arial,sans-serif" fill="#54E2D1">v0.5.0</text>
+<text x="157" y="153" font-size="18" font-weight="700" font-family="Inter,Segoe UI,Arial,sans-serif" fill="#F0F5FF">Core CLI + bundles</text>
+<text x="157" y="175" font-size="13" font-family="Inter,Segoe UI,Arial,sans-serif" fill="#A8B8CF">Native installs, docs, releases and contributors</text>
+<rect x="829" y="145" width="116" height="29" rx="14" fill="#54E2D1" fill-opacity=".14"/>
+<text x="887" y="164" text-anchor="middle" font-size="12" font-weight="700" font-family="Inter,Segoe UI,Arial,sans-serif" fill="#54E2D1">SHIPPED</text>
+</g>
+<g>
+<rect x="30" y="202" width="940" height="64" rx="13" fill="#182338" stroke="#34425c"/>
+<rect x="43" y="213" width="92" height="42" rx="9" fill="#7C91FF" fill-opacity=".14"/>
+<text x="89" y="239" text-anchor="middle" font-size="14" font-weight="700" font-family="Inter,Segoe UI,Arial,sans-serif" fill="#7C91FF">v0.5.x</text>
+<text x="157" y="227" font-size="18" font-weight="700" font-family="Inter,Segoe UI,Arial,sans-serif" fill="#F0F5FF">Reliability</text>
+<text x="157" y="249" font-size="13" font-family="Inter,Segoe UI,Arial,sans-serif" fill="#A8B8CF">Manager fixtures and runtime compatibility tests</text>
+<rect x="829" y="219" width="116" height="29" rx="14" fill="#7C91FF" fill-opacity=".14"/>
+<text x="887" y="238" text-anchor="middle" font-size="12" font-weight="700" font-family="Inter,Segoe UI,Arial,sans-serif" fill="#7C91FF">NEXT</text>
+</g>
+<g>
+<rect x="30" y="276" width="940" height="64" rx="13" fill="#182338" stroke="#34425c"/>
+<rect x="43" y="287" width="92" height="42" rx="9" fill="#96A8C3" fill-opacity=".14"/>
+<text x="89" y="313" text-anchor="middle" font-size="14" font-weight="700" font-family="Inter,Segoe UI,Arial,sans-serif" fill="#96A8C3">v0.6+</text>
+<text x="157" y="301" font-size="18" font-weight="700" font-family="Inter,Segoe UI,Arial,sans-serif" fill="#F0F5FF">Developer experience</text>
+<text x="157" y="323" font-size="13" font-family="Inter,Segoe UI,Arial,sans-serif" fill="#A8B8CF">Project picker, scripts overview and diagnostics</text>
+<rect x="829" y="293" width="116" height="29" rx="14" fill="#96A8C3" fill-opacity=".14"/>
+<text x="887" y="312" text-anchor="middle" font-size="12" font-weight="700" font-family="Inter,Segoe UI,Arial,sans-serif" fill="#96A8C3">PLANNED</text>
+</g>
+<g>
+<rect x="30" y="350" width="940" height="64" rx="13" fill="#182338" stroke="#34425c"/>
+<rect x="43" y="361" width="92" height="42" rx="9" fill="#E4C177" fill-opacity=".14"/>
+<text x="89" y="387" text-anchor="middle" font-size="14" font-weight="700" font-family="Inter,Segoe UI,Arial,sans-serif" fill="#E4C177">RFC</text>
+<text x="157" y="375" font-size="18" font-weight="700" font-family="Inter,Segoe UI,Arial,sans-serif" fill="#F0F5FF">Remote bundle exchange</text>
+<text x="157" y="397" font-size="13" font-family="Inter,Segoe UI,Arial,sans-serif" fill="#A8B8CF">Trusted catalog metadata and opt-in bundle fetching</text>
+<rect x="829" y="367" width="116" height="29" rx="14" fill="#E4C177" fill-opacity=".14"/>
+<text x="887" y="386" text-anchor="middle" font-size="12" font-weight="700" font-family="Inter,Segoe UI,Arial,sans-serif" fill="#E4C177">DESIGN</text>
+</g>
+<g>
+<rect x="30" y="424" width="940" height="64" rx="13" fill="#182338" stroke="#34425c"/>
+<rect x="43" y="435" width="92" height="42" rx="9" fill="#E4C177" fill-opacity=".14"/>
+<text x="89" y="461" text-anchor="middle" font-size="14" font-weight="700" font-family="Inter,Segoe UI,Arial,sans-serif" fill="#E4C177">RFC</text>
+<text x="157" y="449" font-size="18" font-weight="700" font-family="Inter,Segoe UI,Arial,sans-serif" fill="#F0F5FF">Runtime bootstrap</text>
+<text x="157" y="471" font-size="13" font-family="Inter,Segoe UI,Arial,sans-serif" fill="#A8B8CF">Preview, consent, verification, then opt-in install</text>
+<rect x="829" y="441" width="116" height="29" rx="14" fill="#E4C177" fill-opacity=".14"/>
+<text x="887" y="460" text-anchor="middle" font-size="12" font-weight="700" font-family="Inter,Segoe UI,Arial,sans-serif" fill="#E4C177">DESIGN</text>
+</g>
+<text x="33" y="516" font-size="12" font-family="Inter,Segoe UI,Arial,sans-serif" fill="#91A3BF">Roadmap is directional and manually updated. Check GitHub issues and the linked RFCs for actual scope.</text>
+</svg>

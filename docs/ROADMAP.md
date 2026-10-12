@@ -8,6 +8,7 @@ This is a **direction, not a delivery promise**. Features and priorities can cha
 - `status`, `plan`, `doctor`, `up`, JSON output and CLI aliases
 - Basic Node workspace handling and runtime version diagnostics
 - Local opt-in JSON dependency bundles
+- Native `add`, `remove` and script `run` workflows for Node and Composer projects
 - CI for Windows/macOS/Linux, shell completion and release installer scripts
 
 ## Before a stable v1.0
@@ -22,8 +23,8 @@ This is a **direction, not a delivery promise**. Features and priorities can cha
 
 ## Potential ideas — not shipped
 
-- `pkx add`: choose the right native manager when adding a package
-- `pkx run`: discover and run project-defined scripts
+- Expand `pkx add` / `pkx remove` to more native ecosystems safely
+- Richer `pkx run` script discovery, including nested monorepos
 - `pkx doctor --fix`: opt-in, reviewable fixes with explicit approval
 - A versioned, curated bundle exchange with ownership and provenance checks
 - Optional dependency audit aggregation across supported ecosystems

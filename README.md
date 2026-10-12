@@ -10,7 +10,7 @@
 <p align="center">An open-source CLI for setting up mixed-language repositories.<br />No new dependency resolver. No replacement lockfiles. No required account.</p>
 <p align="center"><img src="assets/social-preview.svg" width="100%" alt="pkx: one command for every ecosystem" /></p>
 
-> **Status:** `v0.4.0-dev` — developer preview, not a stable release. A remote bundle marketplace and automatic runtime installation do **not** exist yet.
+> **Status:** `v0.5.0-dev` — developer preview, not a stable release. A remote bundle marketplace and automatic runtime installation do **not** exist yet.
 
 ## Why pkx?
 
@@ -50,6 +50,9 @@ Make sure `$(go env GOPATH)/bin` is on `PATH`. On Windows, add the corresponding
 | `pkx doctor` | Diagnose missing/incompatible runtimes (`--json` supported) |
 | `pkx scan` / `pkx ls` | Discover existing projects (`--json` supported) |
 | `pkx install` / `pkx i` | Install without runtime-version preflight (`--dry-run` supported) |
+| `pkx add axios` | Add packages via the detected native manager (`--dev`, `--dry-run`) |
+| `pkx remove axios` / `pkx rm axios` | Remove packages through the native manager |
+| `pkx run dev` | Run a declared Node/Composer script and forward optional arguments after `--` |
 | `pkx plan --only node` | Preview one ecosystem/manager |
 | `pkx init` | Create an empty local `pkx.json` bundle manifest |
 | `pkx bundle install pkx.json --dry-run` | Preview **explicit** dependency additions |
@@ -57,6 +60,29 @@ Make sure `$(go env GOPATH)/bin` is on `PATH`. On Windows, add the corresponding
 | `pkx help plan` | Show help for one command |
 
 Supports npm, pnpm, Yarn, Bun, pip, uv, Poetry, Composer, Cargo and Go modules. See [exact compatibility details](docs/GETTING_STARTED.md#supported-managers-and-behavior). Existing lockfiles remain authoritative.
+
+## Manage packages and run scripts
+
+These commands use the project’s **existing** package manager. Supported for npm, pnpm, Yarn, Bun and Composer; they do not create a separate pkx lockfile.
+
+```sh
+pkx add axios --dry-run          # Preview first; nothing executes
+pkx add axios zod                # Add dependencies
+pkx add vite --dev               # Add development dependencies
+pkx remove axios                 # Remove native dependencies
+pkx run dev                      # Run a declared project script
+pkx run dev -- --host 127.0.0.1 # Forward arguments to the script
+```
+
+With multiple matching projects, pkx **refuses to guess** where packages should go. Choose a project explicitly:
+
+```sh
+pkx add axios --project frontend
+pkx run test --project backend
+pkx add laravel/sanctum --project backend --manager composer
+```
+
+`--project` is relative to `--dir` (default `.`); `--manager` filters the ecosystem. `pkx run` only runs a script defined in `package.json` or `composer.json`, and suggests available scripts if its name is unknown. Add/remove for pip, Cargo and Go are not supported yet. All changes go through native package managers, which may execute untrusted installation hooks or scripts. Preview with `--dry-run` before working with unfamiliar repositories.
 
 ## Local dependency bundles
 

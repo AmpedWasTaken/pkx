@@ -20,6 +20,8 @@ Get started:
   pkx status               See what's in this repository
   pkx plan                 Preview installs without running anything
   pkx up                   Check your environment, then install dependencies
+  pkx add axios             Add a package to a detected project
+  pkx run dev               Run a project-defined script
 
 Commands:
   status   Overview of projects, lockfiles and required tools
@@ -27,12 +29,15 @@ Commands:
   up       Check environment and install dependencies
   scan     List detected projects (--json supported)
   install  Install dependencies with native package managers
+  add      Add one or more dependencies to a selected project
+  remove   Remove dependencies from a selected project
+  run      Execute a declared Node/Composer project script
   doctor   Diagnose missing tools and pinned versions
   bundle   Initialize or install a local dependency bundle
   version  Show the installed pkx version
   completion  Generate shell tab-completion (bash, zsh, fish, powershell)
 
-Shortcuts: pkx ls = scan, pkx i = install, pkx init = bundle init
+Shortcuts: pkx ls = scan, pkx i = install, pkx rm = remove, pkx init = bundle init
 More help: pkx help <command> or pkx <command> --help
 
 Native package managers may run third-party scripts. Review untrusted
@@ -71,6 +76,8 @@ func Run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 		return 0
 	case "scan", "status", "plan", "install", "doctor", "up":
 		return runWorkspace(ctx, command, args[1:], stdout, stderr)
+	case "add", "remove", "run":
+		return runManage(ctx, command, args[1:], stdout, stderr)
 	case "bundle":
 		if len(args) > 2 && (args[2] == "--help" || args[2] == "-h") {
 			return showHelp("bundle", stdout, stderr)

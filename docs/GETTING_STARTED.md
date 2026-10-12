@@ -86,3 +86,17 @@ On PowerShell inspect `pkx completion powershell` and add its output to your pro
 - **Untrusted repository:** Preview the plan and use an isolated environment; native package managers can execute third-party scripts.
 
 Questions? Read [SUPPORT.md](../SUPPORT.md) or use the [issue forms](https://github.com/AmpedWasTaken/pkx/issues/new/choose).
+
+## Adding dependencies and running scripts
+
+In a workspace with one supported project:
+
+```sh
+pkx add axios --dry-run
+pkx add axios
+pkx add vite --dev
+pkx remove axios
+pkx run dev -- --host 127.0.0.1
+```
+
+For monorepos with several supported projects, add `--project frontend` (relative to `--dir`) to select the target explicitly. Add/remove and declared-script run are currently supported for npm, pnpm, Yarn, Bun and Composer. `pkx run` reads script names from `package.json` or `composer.json`. Native manager side effects still apply; preview using `--dry-run`.

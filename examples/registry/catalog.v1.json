@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "bundles": [
+    {
+      "id": "example/fullstack",
+      "version": "0.1.0",
+      "summary": "Offline sample metadata for a JavaScript + PHP bundle (not published)",
+      "manifest_path": "../fullstack/pkx.json",
+      "status": "example-only"
+    }
+  ]
+}

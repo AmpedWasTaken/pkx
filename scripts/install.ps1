@@ -1,5 +1,22 @@
 # Download and verify an official pkx Windows release.
 
+param(
+    [string]$Version = "",
+    [string]$InstallDir = (Join-Path $HOME ".local\bin"),
+    [switch]$AddToPath,
+    [switch]$Help
+)
+$ErrorActionPreference = "Stop"
+if ($Help) {
+    Write-Host "Usage: .\install.ps1 [-Version vX.Y.Z] [-InstallDir DIRECTORY] [-AddToPath]"
+    Write-Host "Downloads an official pkx release and verifies its SHA256."
+    Write-Host "Default: latest published release; installation directory: ~/.local/bin."
+    Write-Host "-AddToPath: persist the install directory in your Windows USER PATH (no admin)."
+    Write-Host "Open a NEW CMD/PowerShell window afterwards; existing windows keep their old PATH."
+    exit 0
+}
+
+
 # Windows PATH is case-insensitive. Keep existing entries and never duplicate the
 # canonical install directory in the user's persistent environment variables.
 function Add-PkxUserPath {
@@ -29,21 +46,6 @@ function Add-PkxUserPath {
     }
     Write-Host "Close all existing CMD / PowerShell windows and open a NEW terminal."
     Write-Host "Then verify: where pkx   (CMD) or Get-Command pkx   (PowerShell)"
-}
-param(
-    [string]$Version = "",
-    [string]$InstallDir = (Join-Path $HOME ".local\bin"),
-    [switch]$AddToPath,
-    [switch]$Help
-)
-$ErrorActionPreference = "Stop"
-if ($Help) {
-    Write-Host "Usage: .\install.ps1 [-Version vX.Y.Z] [-InstallDir DIRECTORY] [-AddToPath]"
-    Write-Host "Downloads an official pkx release and verifies its SHA256."
-    Write-Host "Default: latest published release; installation directory: ~/.local/bin."
-    Write-Host "-AddToPath: persist the install directory in your Windows USER PATH (no admin)."
-    Write-Host "Open a NEW CMD/PowerShell window afterwards; existing windows keep their old PATH."
-    exit 0
 }
 
 if (-not $Version) {

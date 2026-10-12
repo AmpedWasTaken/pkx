@@ -1,0 +1,36 @@
+name: Feature request
+description: Propose a workflow improvement or package-manager change.
+title: "feat: "
+body:
+  - type: markdown
+    attributes:
+      value: "Describe the real developer problem first. pkx is a thin layer over native tools; see docs/ROADMAP.md before proposing a large feature."
+  - type: textarea
+    id: problem
+    attributes:
+      label: Developer problem
+      description: What do you currently do manually?
+      placeholder: When I clone a repository with ...
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed experience
+      description: Example CLI commands or output are helpful.
+    validations:
+      required: true
+  - type: textarea
+    id: concerns
+    attributes:
+      label: Alternatives and compatibility concerns
+      description: How should this interact with native tools and lockfiles?
+    validations:
+      required: false
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I can help implement, document or test this.
+          required: false

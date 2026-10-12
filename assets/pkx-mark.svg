@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+<title id="title">pkx logo</title><desc id="desc">Package cube connecting three nodes</desc>
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#172033"/><stop offset="1" stop-color="#0C1220"/></linearGradient><linearGradient id="accent" x2="1" y2="1"><stop stop-color="#7C91FF"/><stop offset="1" stop-color="#54E2D1"/></linearGradient></defs>
+<rect width="128" height="128" rx="28" fill="url(#bg)"/>
+<path d="M38 40 64 25 90 40v32L64 87 38 72Z" fill="none" stroke="url(#accent)" stroke-width="7" stroke-linejoin="round"/>
+<path d="M38 40 64 56 90 40M64 56v31" fill="none" stroke="#A4B0FF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="38" cy="72" r="6" fill="#54E2D1"/><circle cx="90" cy="72" r="6" fill="#7C91FF"/>
+<path d="M53 104h22" stroke="#6D7F9C" stroke-width="5" stroke-linecap="round"/>
+</svg>

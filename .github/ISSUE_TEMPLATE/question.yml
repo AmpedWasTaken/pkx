@@ -1,0 +1,21 @@
+name: Question / Help
+description: Ask a usage question or get help with the developer preview.
+title: "question: "
+body:
+  - type: markdown
+    attributes:
+      value: "Check `pkx status`, `pkx doctor` and docs/GETTING_STARTED.md first. Please don't post secrets or private registry credentials."
+  - type: input
+    id: goal
+    attributes:
+      label: What are you trying to do?
+      placeholder: Set up Laravel + Vue on Windows
+    validations:
+      required: true
+  - type: textarea
+    id: attempts
+    attributes:
+      label: What have you tried?
+      description: Include sanitized output if relevant.
+    validations:
+      required: false

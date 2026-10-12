@@ -12,6 +12,17 @@
 
 > **Version:** `v0.5.0` — first public **0.x** release candidate. The CLI is usable but its interfaces may change before v1.0. A remote bundle marketplace and automatic runtime installation do **not** exist yet.
 
+## Development status
+
+<p align="center">
+  <a href="https://github.com/AmpedWasTaken/pkx/releases/tag/v0.5.0"><img src="assets/badge-core.svg" alt="Core CLI: v0.5.0 shipped" /></a>
+  <a href="https://github.com/AmpedWasTaken/pkx/issues/12"><img src="assets/badge-marketplace.svg" alt="Bundle marketplace: design proposal" /></a>
+  <a href="https://github.com/AmpedWasTaken/pkx/issues/14"><img src="assets/badge-runtimes.svg" alt="Automatic runtime bootstrap: design proposal" /></a>
+</p>
+<p align="center"><a href="docs/ROADMAP.md"><img src="assets/roadmap.svg" width="100%" alt="pkx roadmap: core CLI shipped, reliability next, developer UX planned, remote marketplace and runtime bootstrap under design" /></a></p>
+
+**The graphic shows milestone states, not measured percentages or a release schedule.** It is updated manually as work is completed. Follow [the roadmap](docs/ROADMAP.md), [open feature issues](https://github.com/AmpedWasTaken/pkx/issues) and [the bundle marketplace](docs/rfcs/0001-bundle-registry.md) / [runtime bootstrap](docs/rfcs/0002-runtime-bootstrap.md) proposals. The marketplace and automatic runtime installation are **not implemented yet**.
+
 ## Why pkx?
 
 A repo can have a JavaScript frontend, a PHP backend and Python scripts. Getting started often means figuring out which package manager belongs in which folder, matching runtime versions and remembering install commands. **pkx finds those projects and delegates to their native tools.**

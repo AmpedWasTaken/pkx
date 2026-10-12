@@ -30,6 +30,7 @@ go test ./...
 go test -race ./... # requires a race-enabled Go environment
 go vet ./...
 go build ./cmd/pkx
+go run ./scripts/check-docs.go
 ```
 
 CI checks formatting, tests, vet, build and installer help/syntax on Linux, macOS and Windows. You don't need access to all three OSes locally: state which platforms you tested.

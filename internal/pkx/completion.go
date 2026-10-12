@@ -47,7 +47,7 @@ _pkx_complete() {
     return
   fi
   if [[ "$subcommand" == bundle && "$COMP_CWORD" -eq 2 ]]; then
-    COMPREPLY=( $(compgen -W 'init install' -- "$cur") )
+    COMPREPLY=( $(compgen -W 'init install search info fetch' -- "$cur") )
     return
   fi
   if [[ "$cur" == -* ]]; then
@@ -73,7 +73,7 @@ _pkx() {
     completion) compadd bash zsh fish powershell; return ;;
   esac
   if [[ "$words[2]" == bundle && CURRENT == 3 ]]; then
-    compadd init install
+    compadd init install search info fetch
     return
   fi
   _arguments '*: :((--dir --depth --only --project --manager --dev --dry-run --json --help))'
@@ -84,7 +84,7 @@ compdef _pkx pkx
 const fishCompletion = `# pkx fish completion
 complete -c pkx -f
 complete -c pkx -n '__fish_use_subcommand' -a 'status plan up scan install add remove run doctor bundle init version completion help ls i rm'
-complete -c pkx -n '__fish_seen_subcommand_from bundle' -a 'init install'
+complete -c pkx -n '__fish_seen_subcommand_from bundle' -a 'init install search info fetch'
 complete -c pkx -n '__fish_seen_subcommand_from completion' -a 'bash zsh fish powershell'
 complete -c pkx -l project -r -F
 complete -c pkx -l manager -r -a 'npm pnpm yarn bun composer'
@@ -106,7 +106,7 @@ Register-ArgumentCompleter -Native -CommandName pkx -ScriptBlock {
         '--manager' { @('npm','pnpm','yarn','bun','composer'); break }
         '--only' { @('node','npm','pnpm','yarn','bun','php','composer','python','pip','uv','poetry','rust','cargo','go'); break }
         'completion' { @('bash','zsh','fish','powershell'); break }
-        'bundle' { @('init','install'); break }
+        'bundle' { @('init','install','search','info','fetch'); break }
         default {
             if ($words.Count -le 2) { @('status','plan','up','scan','install','doctor','bundle','init','version','completion','help','ls','i') }
             else { @('--dir','--depth','--only','--project','--manager','--dev','--dry-run','--json','--help') }

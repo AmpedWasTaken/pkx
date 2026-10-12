@@ -115,3 +115,16 @@ pkx run dev -- --host 127.0.0.1
 ```
 
 For monorepos with several supported projects, add `--project frontend` (relative to `--dir`) to select the target explicitly. Add/remove and declared-script run are currently supported for npm, pnpm, Yarn, Bun and Composer. `pkx run` reads script names from `package.json` or `composer.json`. Native manager side effects still apply; preview using `--dry-run`.
+
+## Marketplace (development preview)
+
+The [marketplace](https://pkx.ampedwastaken.dev/marketplace/) hosts a small, curated catalog of example dependency bundles. CLI commands below are available in **unreleased v0.6 development source**, not the published v0.5.0 binary:
+
+```sh
+pkx bundle search frontend
+pkx bundle info pkx/frontend-toolkit@0.1.0
+pkx bundle fetch pkx/frontend-toolkit@0.1.0
+pkx bundle install pkx.json --dry-run
+```
+
+`search` and `info` do not modify local files. `fetch` downloads a versioned manifest over HTTPS, enforces the catalog SHA256 digest, validates schema and path constraints and **refuses to overwrite** an existing `pkx.json`. It does **not** install dependencies. Package-manager installation remains a separate explicit command; untrusted packages may run scripts. Catalog SHA256 integrity does not prove maintainer identity. See [RFC 0001](rfcs/0001-bundle-registry.md).

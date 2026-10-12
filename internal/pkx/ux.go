@@ -19,7 +19,7 @@ var commandHelp = map[string]string{
 	"up":         "pkx up [--dir PATH] [--depth N] [--only MANAGER] [--dry-run]\n  Check the environment, then run native dependency installers.\n  Use 'pkx plan' first to see what will run.\n",
 	"install":    "pkx install [--dir PATH] [--depth N] [--only MANAGER] [--dry-run]\n  Run native package managers without checking runtime version pins.\n  'pkx i' is a shortcut; 'pkx up' also checks the environment.\n",
 	"doctor":     "pkx doctor [--dir PATH] [--depth N] [--only MANAGER] [--json]\n  Diagnose missing tools or incompatible pinned runtime versions.\n  Use --json for automation (exit code 1 when issues are found).\n  Does not install runtimes or dependencies.\n",
-	"bundle":     "pkx bundle init [--dir PATH]\npkx bundle install FILE [--dir PATH] [--dry-run]\n  Create a local bundle manifest, or apply one after reviewing the plan.\n  'pkx init' is shorthand for 'pkx bundle init'.\n",
+	"bundle":     "pkx bundle init [--dir PATH]\npkx bundle install FILE [--dir PATH] [--dry-run]\npkx bundle search [--json] [QUERY]\npkx bundle info OWNER/NAME@VERSION [--json]\npkx bundle fetch OWNER/NAME@VERSION [--dir PATH]\n  Marketplace commands are read-only except fetch, which saves pkx.json without overwriting.\n  Remote bundles are never installed automatically.\n",
 	"init":       "pkx init [--dir PATH]\n  Shortcut for 'pkx bundle init'. Creates a starter pkx.json.\n",
 	"version":    "pkx version\n  Print the version of the installed CLI.\n",
 	"completion": "pkx completion <bash|zsh|fish|powershell>\n  Print tab completion for your shell; see the README for installation.\n",

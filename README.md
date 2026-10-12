@@ -12,6 +12,77 @@
 
 > **Version:** `v0.5.0` — first public **0.x** release candidate. The CLI is usable but its interfaces may change before v1.0. A remote bundle marketplace and automatic runtime installation do **not** exist yet.
 
+## Install once, use `pkx` anywhere
+
+**pkx is a standalone executable:** you do **not** need Go, Node.js, npm or administrator rights to install the [published binaries](https://github.com/AmpedWasTaken/pkx/releases/tag/v0.5.0). To install dependencies *inside a project*, the relevant native manager (npm, Composer, etc.) must still be installed.
+
+### Windows — works globally in CMD and PowerShell
+
+**Recommended (automated, with checksum verification):** Open **CMD** in any directory and run these commands. This method needs Git to fetch the installer script, but does not need Go or npm:
+
+```cmd
+git clone https://github.com/AmpedWasTaken/pkx.git
+cd pkx
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Version v0.5.0 -AddToPath
+```
+
+The script verifies the GitHub release archive's SHA256, installs `pkx.exe` into **`%USERPROFILE%\.local\bin`** and (only with `-AddToPath`) permanently adds that folder to **your user PATH**. It doesn't require admin permissions or change the system PATH. You can inspect [the installer source](scripts/install.ps1) before running it.
+
+**Important: close CMD / PowerShell and open a NEW terminal** after installation. From **any directory**, run:
+
+```cmd
+where pkx
+pkx version
+cd C:\path\to\your-project
+pkx status
+pkx plan
+pkx up
+```
+
+**Without Git or PowerShell scripts:** Download `pkx_v0.5.0_windows_amd64.zip` (x64 PCs) or `pkx_v0.5.0_windows_arm64.zip` (Windows ARM) from [GitHub Releases](https://github.com/AmpedWasTaken/pkx/releases/tag/v0.5.0). Verify it against `SHA256SUMS`, unzip `pkx.exe` into `%USERPROFILE%\.local\bin`, then add that folder to your *user* `Path` in **Edit environment variables for your account → Path → New**. Open a new CMD and run `pkx version`.
+
+### macOS or Linux — works in every terminal
+
+From a reviewed checkout (Git required, but no Go/npm):
+
+```sh
+git clone https://github.com/AmpedWasTaken/pkx.git
+cd pkx
+sh scripts/install.sh v0.5.0
+```
+
+The checksum-verifying script installs `pkx` to `~/.local/bin`. If `pkx version` returns **command not found**, add that directory to your shell PATH **once**:
+
+**macOS (default Zsh):**
+
+```sh
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zprofile
+source ~/.zprofile
+pkx version
+```
+
+**Linux (Bash):**
+
+```sh
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+pkx version
+```
+
+You can instead download your matching `.tar.gz` and `SHA256SUMS` from [GitHub Releases](https://github.com/AmpedWasTaken/pkx/releases/tag/v0.5.0), verify it, and manually place the executable in a directory already on your PATH.
+
+### Alternative: install with Go
+
+If you already have Go 1.23+ and prefer `go install`:
+
+```sh
+go install github.com/AmpedWasTaken/pkx/cmd/pkx@v0.5.0
+```
+
+Go installs the binary in `$(go env GOPATH)/bin` (unless `GOBIN` is configured). **That directory must also be on your PATH** for `pkx` to work globally.
+
+**Troubleshooting:** On Windows CMD use `where pkx`, in PowerShell use `Get-Command pkx`, and on macOS/Linux use `command -v pkx`. If the binary is installed but not detected, check the PATH entry and restart your terminal (on Windows, signing out/in may be necessary for apps that kept an old environment). For the full guide see [Getting started](docs/GETTING_STARTED.md).
+
 ## Development status
 
 <p align="center">
@@ -35,21 +106,6 @@ pkx up      # Check the environment, then install dependencies
 ```
 
 `pkx up` runs native package managers with your permissions; their lifecycle scripts may execute third-party code. Review untrusted repositories and use `pkx plan` first.
-
-## Install
-
-**From source:** build with Go 1.23+ (works before and after the first GitHub release):
-
-```sh
-git clone https://github.com/AmpedWasTaken/pkx.git
-cd pkx
-go install ./cmd/pkx
-pkx version
-```
-
-Make sure `$(go env GOPATH)/bin` is on `PATH`. On Windows, add the corresponding `go env GOPATH` `\bin` directory to `PATH`.
-
-**For a published version:** download from [GitHub Releases](https://github.com/AmpedWasTaken/pkx/releases) or use the checksum-verifying [`scripts/install.sh`](scripts/install.sh) / [`scripts/install.ps1`](scripts/install.ps1) from a reviewed checkout. The installers don't elevate privileges or modify `PATH` automatically. After the v0.5.0 tag exists you can also install with `go install github.com/AmpedWasTaken/pkx/cmd/pkx@v0.5.0`. Full details: [Getting started](docs/GETTING_STARTED.md).
 
 ## Everyday commands
 

@@ -2,20 +2,38 @@
 
 pkx is a Go CLI that orchestrates **existing** package managers. It does not replace your dependency resolver or lockfiles, and does not install system runtimes automatically.
 
-## Install pkx
+## Install pkx globally — no Go/npm required
 
-Build from source with Go 1.23+ (also works before the first tagged release):
+**Recommended Windows CMD setup (requires Git to check out the installer):**
+
+```cmd
+git clone https://github.com/AmpedWasTaken/pkx.git
+cd pkx
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Version v0.5.0 -AddToPath
+```
+
+The script downloads the published archive, verifies it using `SHA256SUMS`, places `pkx.exe` in `%USERPROFILE%\.local\bin`, and **only with `-AddToPath`** permanently adds that directory to your Windows *user* PATH. It does not need administrator privileges or modify system PATH. Close existing CMD/PowerShell windows and open a **new CMD**:
+
+```cmd
+where pkx
+pkx version
+```
+
+If you cannot use Git or a PowerShell installer, use the [v0.5.0 release archive](https://github.com/AmpedWasTaken/pkx/releases/tag/v0.5.0) matching your architecture, verify the SHA256, place `pkx.exe` in `%USERPROFILE%\.local\bin`, and add that folder via **Edit environment variables for your account → Path → New**. Open a new terminal to pick it up.
+
+**Linux and macOS:** from a reviewed Git checkout:
 
 ```sh
 git clone https://github.com/AmpedWasTaken/pkx.git
 cd pkx
-go install ./cmd/pkx
-pkx version
+sh scripts/install.sh v0.5.0
 ```
 
-If `pkx` is not found, add `$(go env GOPATH)/bin` (Windows: the matching `\bin` directory) to your shell `PATH`.
+The script verifies SHA256 and writes `~/.local/bin/pkx`. If not already on PATH, add `export PATH="$HOME/.local/bin:$PATH"` to `~/.bashrc` on Linux Bash or `~/.zprofile` on macOS Zsh, then restart the terminal. Confirm with `command -v pkx && pkx version`.
 
-When [GitHub Releases](https://github.com/AmpedWasTaken/pkx/releases) contain published archives, you can install a binary without Go. After the v0.5.0 tag exists, you can also use `go install github.com/AmpedWasTaken/pkx/cmd/pkx@v0.5.0`. From a reviewed checkout, inspect `sh scripts/install.sh --help` or `./scripts/install.ps1 -Help` to use the checksum-verifying installers. They do not change `PATH` or request administrator privileges.
+**With Go 1.23+:** `go install github.com/AmpedWasTaken/pkx/cmd/pkx@v0.5.0`, ensuring `$(go env GOPATH)/bin` (or your `GOBIN`) is on PATH.
+
+pkx itself is a standalone CLI. Projects still need their underlying package managers to be installed for operations like `pkx up` and `pkx add`. No automatic system runtime installation exists yet.
 
 ## First five minutes
 

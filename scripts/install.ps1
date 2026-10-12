@@ -1,15 +1,51 @@
 # Download and verify an official pkx Windows release.
+
 param(
     [string]$Version = "",
     [string]$InstallDir = (Join-Path $HOME ".local\bin"),
+    [switch]$AddToPath,
     [switch]$Help
 )
 $ErrorActionPreference = "Stop"
 if ($Help) {
-    Write-Host "Usage: .\install.ps1 [-Version vX.Y.Z] [-InstallDir DIRECTORY]"
+    Write-Host "Usage: .\install.ps1 [-Version vX.Y.Z] [-InstallDir DIRECTORY] [-AddToPath]"
     Write-Host "Downloads an official pkx release and verifies its SHA256."
     Write-Host "Default: latest published release; installation directory: ~/.local/bin."
+    Write-Host "-AddToPath: persist the install directory in your Windows USER PATH (no admin)."
+    Write-Host "Open a NEW CMD/PowerShell window afterwards; existing windows keep their old PATH."
     exit 0
+}
+
+
+# Windows PATH is case-insensitive. Keep existing entries and never duplicate the
+# canonical install directory in the user's persistent environment variables.
+function Add-PkxUserPath {
+    param([Parameter(Mandatory=$true)][string]$Directory)
+    $fullDir = [System.IO.Path]::GetFullPath($Directory).TrimEnd([char[]]@('\', '/'))
+    $original = [Environment]::GetEnvironmentVariable('Path', [EnvironmentVariableTarget]::User)
+    $entries = @($original -split ';' | Where-Object { $_ -and $_.Trim() })
+    $alreadyPresent = $false
+    foreach ($entry in $entries) {
+        $candidate = [Environment]::ExpandEnvironmentVariables($entry.Trim().Trim('"'))
+        $candidate = $candidate.TrimEnd([char[]]@('\', '/'))
+        if ([string]::Equals($candidate, $fullDir, [StringComparison]::OrdinalIgnoreCase)) {
+            $alreadyPresent = $true
+            break
+        }
+    }
+    if (-not $alreadyPresent) {
+        $newPath = if ([string]::IsNullOrWhiteSpace($original)) {
+            $fullDir
+        } else {
+            $original.TrimEnd(';') + ';' + $fullDir
+        }
+        [Environment]::SetEnvironmentVariable('Path', $newPath, [EnvironmentVariableTarget]::User)
+        Write-Host "Added $fullDir to your user PATH (persisted, no administrator required)."
+    } else {
+        Write-Host "Already on your user PATH: $fullDir"
+    }
+    Write-Host "Close all existing CMD / PowerShell windows and open a NEW terminal."
+    Write-Host "Then verify: where pkx   (CMD) or Get-Command pkx   (PowerShell)"
 }
 
 if (-not $Version) {
@@ -50,11 +86,15 @@ try {
     Expand-Archive -Path $archive -DestinationPath $unpack
     $binary = Join-Path $unpack 'pkx.exe'
     if (-not (Test-Path -PathType Leaf $binary)) { throw "Archive does not contain pkx.exe." }
+    $InstallDir = [System.IO.Path]::GetFullPath($InstallDir)
     New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
-    Copy-Item -Path $binary -Destination (Join-Path $InstallDir 'pkx.exe') -Force
-    Write-Host "Installed pkx $Version to $(Join-Path $InstallDir 'pkx.exe')"
-    if (($env:PATH -split ';') -notcontains $InstallDir) {
-        Write-Host "Add $InstallDir to your PATH if pkx is not recognized."
+    $destination = Join-Path $InstallDir 'pkx.exe'
+    Copy-Item -Path $binary -Destination $destination -Force
+    Write-Host "Installed pkx $Version to $destination"
+    if ($AddToPath) {
+        Add-PkxUserPath -Directory $InstallDir
+    } elseif (($env:Path -split ';') -notcontains $InstallDir) {
+        Write-Host "For global CMD access, rerun with -AddToPath (opt-in), then open a new terminal."
     }
 } finally {
     Remove-Item -Path $tmp -Recurse -Force -ErrorAction SilentlyContinue

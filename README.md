@@ -10,7 +10,7 @@
 <p align="center">An open-source CLI for setting up mixed-language repositories.<br />No new dependency resolver. No replacement lockfiles. No required account.</p>
 <p align="center"><img src="assets/social-preview.svg" width="100%" alt="pkx: one command for every ecosystem" /></p>
 
-> **Status:** `v0.5.0-dev` — developer preview, not a stable release. A remote bundle marketplace and automatic runtime installation do **not** exist yet.
+> **Version:** `v0.5.0` — first public **0.x** release candidate. The CLI is usable but its interfaces may change before v1.0. A remote bundle marketplace and automatic runtime installation do **not** exist yet.
 
 ## Why pkx?
 
@@ -27,7 +27,7 @@ pkx up      # Check the environment, then install dependencies
 
 ## Install
 
-**Current developer preview:** build from source with Go 1.23+ (until tagged release archives are published):
+**From source:** build with Go 1.23+ (works before and after the first GitHub release):
 
 ```sh
 git clone https://github.com/AmpedWasTaken/pkx.git
@@ -38,7 +38,7 @@ pkx version
 
 Make sure `$(go env GOPATH)/bin` is on `PATH`. On Windows, add the corresponding `go env GOPATH` `\bin` directory to `PATH`.
 
-**After a release is published:** download from [GitHub Releases](https://github.com/AmpedWasTaken/pkx/releases) or use the checksum-verifying [`scripts/install.sh`](scripts/install.sh) / [`scripts/install.ps1`](scripts/install.ps1) from a reviewed checkout. The installers don't elevate privileges or modify `PATH` automatically. Full details: [Getting started](docs/GETTING_STARTED.md).
+**For a published version:** download from [GitHub Releases](https://github.com/AmpedWasTaken/pkx/releases) or use the checksum-verifying [`scripts/install.sh`](scripts/install.sh) / [`scripts/install.ps1`](scripts/install.ps1) from a reviewed checkout. The installers don't elevate privileges or modify `PATH` automatically. After the v0.5.0 tag exists you can also install with `go install github.com/AmpedWasTaken/pkx/cmd/pkx@v0.5.0`. Full details: [Getting started](docs/GETTING_STARTED.md).
 
 ## Everyday commands
 
@@ -113,6 +113,7 @@ pkx is MIT licensed and developed in the open. Bug fixes, tests, documentation, 
 - **[Contributing](CONTRIBUTING.md)** — how to set up, test and submit a PR
 - **[Good first issues](https://github.com/AmpedWasTaken/pkx/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)** · **[All issues](https://github.com/AmpedWasTaken/pkx/issues)** — choose a task or report friction
 - **[Roadmap](docs/ROADMAP.md)** · **[Architecture](docs/ARCHITECTURE.md)** — project scope and decisions
+- **[Changelog](CHANGELOG.md)** · **[Release notes](docs/releases/v0.5.0.md)** · **[Release process](docs/RELEASING.md)** — versions, packages and verification
 - **[Support](SUPPORT.md)** · **[Code of conduct](CODE_OF_CONDUCT.md)** · **[Security](SECURITY.md)**
 
 If pkx helps in your own repo, **try it and open an issue with a reproducible case**. Real-world layouts and platform-specific issues are especially useful. Stars are appreciated, but good reports and PRs matter more.

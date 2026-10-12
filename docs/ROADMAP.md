@@ -2,12 +2,13 @@
 
 This is a **direction, not a delivery promise**. Features and priorities can change based on testing, contributor availability and feedback. The current implementation is the source of truth.
 
-## In the v0.4 developer preview
+## In the v0.5 release candidate
 
 - Multi-ecosystem discovery and native install planning
 - `status`, `plan`, `doctor`, `up`, JSON output and CLI aliases
 - Basic Node workspace handling and runtime version diagnostics
 - Local opt-in JSON dependency bundles
+- Cross-platform release smoke tests and verified release packaging
 - Native `add`, `remove` and script `run` workflows for Node and Composer projects
 - CI for Windows/macOS/Linux, shell completion and release installer scripts
 

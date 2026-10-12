@@ -4,7 +4,7 @@ pkx is a Go CLI that orchestrates **existing** package managers. It does not rep
 
 ## Install pkx
 
-Until tagged releases are available, use Go 1.23+:
+Build from source with Go 1.23+ (also works before the first tagged release):
 
 ```sh
 git clone https://github.com/AmpedWasTaken/pkx.git
@@ -15,7 +15,7 @@ pkx version
 
 If `pkx` is not found, add `$(go env GOPATH)/bin` (Windows: the matching `\bin` directory) to your shell `PATH`.
 
-When [GitHub Releases](https://github.com/AmpedWasTaken/pkx/releases) contain published archives, you can install a binary without Go. From a reviewed checkout, inspect `sh scripts/install.sh --help` or `./scripts/install.ps1 -Help` to use the checksum-verifying installers. They do not change `PATH` or request administrator privileges.
+When [GitHub Releases](https://github.com/AmpedWasTaken/pkx/releases) contain published archives, you can install a binary without Go. After the v0.5.0 tag exists, you can also use `go install github.com/AmpedWasTaken/pkx/cmd/pkx@v0.5.0`. From a reviewed checkout, inspect `sh scripts/install.sh --help` or `./scripts/install.ps1 -Help` to use the checksum-verifying installers. They do not change `PATH` or request administrator privileges.
 
 ## First five minutes
 

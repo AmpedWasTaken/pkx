@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -111,8 +112,10 @@ func defaultPackageReader() packageSearchReader {
 	}
 }
 
+var packageNamePattern = regexp.MustCompile(`^[a-zA-Z0-9@_./-]{1,180}$`)
+
 func validPackageResult(p PackageResult) bool {
-	if len(p.Name) == 0 || len(p.Name) > 180 || strings.ContainsAny(p.Name, " \n\r\t\x00;|&$\\") || strings.Contains(p.Name, "..") || strings.HasPrefix(p.Name, "-") {
+	if !packageNamePattern.MatchString(p.Name) || strings.Contains(p.Name, "..") || strings.Contains(p.Name, "//") || strings.HasPrefix(p.Name, "/") || strings.HasPrefix(p.Name, "-") {
 		return false
 	}
 	if p.ID != p.Ecosystem+":"+p.Name {

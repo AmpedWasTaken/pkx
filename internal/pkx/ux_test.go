@@ -53,7 +53,11 @@ func TestPlanJSONUsesRelativeDirectoriesAndSelectedManager(t *testing.T) {
 	if err := json.Unmarshal([]byte(out), &doc); err != nil {
 		t.Fatal(err)
 	}
-	if doc.Root != root || len(doc.Steps) != 1 || doc.Steps[0].Directory != "web" || doc.Steps[0].Manager != "npm" || strings.Join(doc.Steps[0].Command, " ") != "npm install" {
+	canonicalRoot, err := rootPath(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if doc.Root != canonicalRoot || len(doc.Steps) != 1 || doc.Steps[0].Directory != "web" || doc.Steps[0].Manager != "npm" || strings.Join(doc.Steps[0].Command, " ") != "npm install" {
 		t.Fatalf("bad JSON plan: %#v", doc)
 	}
 }

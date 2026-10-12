@@ -3,16 +3,26 @@
 set -eu
 
 usage() {
-  printf '%s\n' 'Usage: sh install.sh [vX.Y.Z]' '' \
+  printf '%s\n' 'Usage: sh install.sh [vX.Y.Z] [--add-to-path]' '' \
     'Download and verify an official pkx binary from GitHub Releases.' \
-    'Default: latest published release. Installs to ~/.local/bin (override with PKX_INSTALL_DIR).'
+    'Default: latest published release. Installs to ~/.local/bin (override with PKX_INSTALL_DIR).' \
+    'Optional: --add-to-path updates your user shell profile; restart the terminal afterward.'
 }
 fail() { printf 'pkx installer: %s\n' "$*" >&2; exit 1; }
 
 case "${1:-}" in
   --help|-h) usage; exit 0 ;;
 esac
-[ "$#" -le 1 ] || { usage >&2; exit 2; }
+[ "$#" -le 2 ] || { usage >&2; exit 2; }
+add_to_path=0
+version=""
+for arg do
+  case "$arg" in
+    --add-to-path) add_to_path=1 ;;
+    v[0-9]*) [ -z "$version" ] || fail 'specify only one release version'; version="$arg" ;;
+    *) fail "unknown option or invalid version: $arg" ;;
+  esac
+done
 command -v curl >/dev/null 2>&1 || fail 'curl is required to download releases'
 command -v tar >/dev/null 2>&1 || fail 'tar is required to unpack releases'
 
@@ -27,7 +37,6 @@ case "$(uname -m)" in
   *) fail 'unsupported CPU architecture; compile pkx from source instead' ;;
 esac
 
-version="${1:-}"
 if [ -z "$version" ]; then
   redirect=$(curl -fsSL -o /dev/null -w '%{url_effective}' \
     'https://github.com/AmpedWasTaken/pkx/releases/latest') || fail 'no published release found; try building from source'
@@ -64,7 +73,26 @@ dest="${PKX_INSTALL_DIR:-${HOME:?}/.local/bin}"
 mkdir -p "$dest"
 install -m 0755 "$tmp/unpack/pkx" "$dest/pkx" || fail "could not install into $dest"
 printf 'Installed pkx %s to %s/pkx\n' "$version" "$dest"
-case ":$PATH:" in
-  *":$dest:"*) : ;;
-  *) printf 'Add %s to your PATH if pkx is not recognized.\n' "$dest" ;;
-esac
+if [ "$add_to_path" -eq 1 ]; then
+  # Profile editing is allowed only for the standard per-user install path.
+  # A custom PKX_INSTALL_DIR may contain characters unsafe in shell profiles.
+  [ "$dest" = "$HOME/.local/bin" ] || fail '--add-to-path requires default ~/.local/bin; configure custom PATH manually'
+  case "${SHELL##*/}" in
+    zsh) profile="$HOME/.zprofile" ;;
+    bash) profile="$HOME/.bashrc" ;;
+    *) if [ "$os" = darwin ]; then profile="$HOME/.zprofile"; else profile="$HOME/.profile"; fi ;;
+  esac
+  path_line='export PATH="$HOME/.local/bin:$PATH"'
+  if ! grep -Fqx "$path_line" "$profile" 2>/dev/null; then
+    printf '\n%s\n' "$path_line" >> "$profile" || fail "could not update $profile"
+    printf 'Added ~/.local/bin to %s for future terminals.\n' "$profile"
+  else
+    printf 'PATH setup already exists in %s.\n' "$profile"
+  fi
+  printf 'Open a NEW terminal and run: pkx version\n'
+else
+  case ":$PATH:" in
+    *":$dest:"*) : ;;
+    *) printf 'Add %s to your PATH if pkx is not recognized, or use --add-to-path.\n' "$dest" ;;
+  esac
+fi

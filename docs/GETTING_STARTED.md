@@ -2,38 +2,35 @@
 
 pkx is a Go CLI that orchestrates **existing** package managers. It does not replace your dependency resolver or lockfiles, and does not install system runtimes automatically.
 
-## Install pkx globally — no Go/npm required
+## One-line global installation
 
-**Recommended Windows CMD setup (requires Git to check out the installer):**
+Install directly from [pkx.ampedwastaken.dev](https://pkx.ampedwastaken.dev) without needing Go or npm.
+
+**Windows CMD / PowerShell:**
 
 ```cmd
-git clone https://github.com/AmpedWasTaken/pkx.git
-cd pkx
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Version v0.5.0 -AddToPath
+powershell -NoProfile -ExecutionPolicy Bypass -Command "& ([scriptblock]::Create((irm 'https://pkx.ampedwastaken.dev/install.ps1'))) -AddToPath"
 ```
 
-The script downloads the published archive, verifies it using `SHA256SUMS`, places `pkx.exe` in `%USERPROFILE%\.local\bin`, and **only with `-AddToPath`** permanently adds that directory to your Windows *user* PATH. It does not need administrator privileges or modify system PATH. Close existing CMD/PowerShell windows and open a **new CMD**:
+**macOS/Linux:**
 
-```cmd
-where pkx
+```sh
+curl -fsSL https://pkx.ampedwastaken.dev/install.sh | sh -s -- --add-to-path
+```
+
+The installer uses the latest published GitHub release and verifies the downloaded archive's SHA256 against the release checksum file. The scripts themselves are served over HTTPS and are open source in `site/install.ps1` and `site/install.sh`. You should review scripts before running downloaded code on untrusted hosts.
+
+These commands opt into user-level PATH setup: on Windows pkx installs to `%USERPROFILE%\.local\bin`; on macOS/Linux to `~/.local/bin`. Close the terminal and open a **new** one, then verify:
+
+```sh
 pkx version
 ```
 
-If you cannot use Git or a PowerShell installer, use the [v0.5.0 release archive](https://github.com/AmpedWasTaken/pkx/releases/tag/v0.5.0) matching your architecture, verify the SHA256, place `pkx.exe` in `%USERPROFILE%\.local\bin`, and add that folder via **Edit environment variables for your account → Path → New**. Open a new terminal to pick it up.
+On Windows CMD use `where pkx` if it is not found. In PowerShell use `Get-Command pkx`. On Unix use `command -v pkx`. The PATH update is user-specific, doesn't elevate privileges and doesn't modify the machine-wide PATH. If you don't want a PATH change, download the versioned binary manually or use `scripts/install.ps1` / `scripts/install.sh` without `-AddToPath` / `--add-to-path`.
 
-**Linux and macOS:** from a reviewed Git checkout:
+**Alternative via Go (1.23+):** `go install github.com/AmpedWasTaken/pkx/cmd/pkx@v0.5.0`. Make sure `$(go env GOPATH)/bin` is on PATH.
 
-```sh
-git clone https://github.com/AmpedWasTaken/pkx.git
-cd pkx
-sh scripts/install.sh v0.5.0
-```
-
-The script verifies SHA256 and writes `~/.local/bin/pkx`. If not already on PATH, add `export PATH="$HOME/.local/bin:$PATH"` to `~/.bashrc` on Linux Bash or `~/.zprofile` on macOS Zsh, then restart the terminal. Confirm with `command -v pkx && pkx version`.
-
-**With Go 1.23+:** `go install github.com/AmpedWasTaken/pkx/cmd/pkx@v0.5.0`, ensuring `$(go env GOPATH)/bin` (or your `GOBIN`) is on PATH.
-
-pkx itself is a standalone CLI. Projects still need their underlying package managers to be installed for operations like `pkx up` and `pkx add`. No automatic system runtime installation exists yet.
+pkx orchestrates native package managers; using it inside a repository may still require npm, PHP/Composer, Python, Go or other tools and native lifecycle scripts may execute. It does **not** install missing runtimes automatically.
 
 ## First five minutes
 

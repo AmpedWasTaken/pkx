@@ -45,6 +45,9 @@ jobs:
         run: go vet ./...
       - name: Build
         run: go build ./cmd/pkx
+      - name: Native npm CLI smoke
+        shell: bash
+        run: bash scripts/smoke.sh
       - name: Race tests (Linux)
         if: runner.os == 'Linux'
         run: go test -race ./...

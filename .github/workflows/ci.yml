@@ -40,7 +40,11 @@ jobs:
       - name: Verify Windows installer
         if: runner.os == 'Windows'
         shell: pwsh
-        run: .\scripts\install.ps1 -Help
+        run: |
+          $usage = & .\scripts\install.ps1 -Help | Out-String
+          if ($usage -notmatch 'AddToPath' -or $usage -notmatch 'NEW CMD') {
+            throw 'Windows installer must explain user PATH opt-in and terminal restart'
+          }
       - name: Test
         run: go test ./...
       - name: Vet

@@ -10,11 +10,13 @@
   <a href="CONTRIBUTING.md"><img alt="Contributions welcome" src="https://img.shields.io/badge/contributions-welcome-54e2d1"></a>
 </p>
 
-**pkx** is a cross-platform, open-source CLI that finds package managers in your repository and uses the native tools you already know. No custom dependency resolver, replacement lockfile, or required account.
+**pkx** is a cross-platform, open-source CLI that finds package managers in mixed-language repositories and runs your existing native tools. One setup workflow; no new lockfile, account or custom dependency solver.
 
 ## Install in one line
 
-Full instructions and copyable commands: **[pkx.ampedwastaken.dev](https://pkx.ampedwastaken.dev)** ([website source](https://github.com/AmpedWasTaken/pkx-website)).
+**Safer manual option (no pipe-to-shell):** Download your OS archive **and `SHA256SUMS`** from [the official GitHub release](https://github.com/AmpedWasTaken/pkx/releases/tag/v0.5.0). Compare the archive's SHA256 with its matching checksum entry, extract `pkx` / `pkx.exe` and add its folder to your user `PATH`. [Full steps and troubleshooting](docs/GETTING_STARTED.md).
+
+**Convenience installers:** [pkx.ampedwastaken.dev](https://pkx.ampedwastaken.dev) ([website source](https://github.com/AmpedWasTaken/pkx-website)). **Review the scripts before running them**: checksums verify the downloaded archive against the published checksum list, but they do not independently authenticate the remotely served installer or prevent a compromised release account from changing both files.
 
 **Windows — CMD or PowerShell**
 
@@ -57,7 +59,14 @@ pkx doctor                    # Diagnose missing tools
 pkx install --dry-run         # Preview without making changes
 ```
 
-**Supported installation managers:** npm, pnpm, Yarn, Bun, pip, uv, Poetry, Composer, Cargo, and Go modules. `add`, `remove`, and `run` currently support Node managers and Composer. See [compatibility details](docs/GETTING_STARTED.md#supported-managers-and-behavior).
+**Current scope (important):**
+
+| Capability | Supported managers |
+| --- | --- |
+| **Install / `pkx up`** | **10:** npm, pnpm, Yarn, Bun, pip, uv, Poetry, Composer, Cargo, Go modules |
+| **`add` / `remove` / `run`** | **5:** npm, pnpm, Yarn, Bun, Composer (Node + PHP only) |
+
+**Python, Rust and Go add/remove/run are not supported yet.** See [compatibility and limitations](docs/GETTING_STARTED.md#supported-managers-and-behavior). Marketplace discovery is in unreleased v0.6 development source; the published v0.5.0 binary does **not** have `pkx bundle search/info/fetch`.
 
 > pkx invokes native package managers, which may execute third-party lifecycle scripts. Always inspect untrusted repositories and use `pkx plan` first. Runtime installation and the remote bundle marketplace are not implemented yet.
 
@@ -77,7 +86,7 @@ The roadmap uses qualitative milestones, not made-up completion percentages. [Se
 
 pkx is MIT-licensed and community-driven. Contributions to tests, platform support, adapters, documentation and usability are welcome.
 
-**[Contributing guide](CONTRIBUTING.md)** · **[Good first issues](https://github.com/AmpedWasTaken/pkx/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)** · **[Architecture](docs/ARCHITECTURE.md)** · **[Changelog](CHANGELOG.md)** · **[Security](SECURITY.md)**
+**[Contributing guide](CONTRIBUTING.md)** · **[Become an adapter author](examples/adapter-npm/README.md)** · **[Good first issues](https://github.com/AmpedWasTaken/pkx/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)** · **[Architecture](docs/ARCHITECTURE.md)** · **[Changelog](CHANGELOG.md)** · **[Security](SECURITY.md)**
 
 ---
 <sub>Made by <a href="https://github.com/AmpedWasTaken">AmpedWasTaken</a> and open-source contributors.</sub>

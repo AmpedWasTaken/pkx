@@ -25,7 +25,7 @@ go run ./cmd/pkx help
 Before a pull request:
 
 ```sh
-gofmt -w cmd/pkx internal/pkx
+gofmt -w cmd/pkx internal/pkx examples/adapter-npm
 go test ./...
 go test -race ./... # requires a race-enabled Go environment
 go vet ./...
@@ -34,6 +34,39 @@ go run ./scripts/check-docs.go
 ```
 
 CI checks formatting, tests, vet, build and installer help/syntax on Linux, macOS and Windows. You don't need access to all three OSes locally: state which platforms you tested.
+
+## Become an adapter author (Word een adapter-auteur)
+
+You don't need to build an entire package manager to contribute. **Start by making one manager behavior more predictable**, with a small manifest fixture and a read-only test.
+
+**Try the working adapter example first:**
+
+```sh
+go run ./examples/adapter-npm
+go test ./examples/adapter-npm
+```
+
+It produces `npm: npm install` and `Nothing executed.` The [example source](examples/adapter-npm/main.go) actually calls the exported `Discover` and `InstallPlan` functions. No npm installation, network request or lifecycle script is run. This is a demonstration of the **existing built-in manager architecture**, not an external plugin API.
+
+**How manager support is wired today:**
+
+| File | What you'll usually change |
+| --- | --- |
+| [`discover.go`](internal/pkx/discover.go) | Detect manifests/lockfiles and choose an ecosystem/manager |
+| [`plan.go`](internal/pkx/plan.go) | Produce `Step{Directory, Manager, Binary, Args}`, using argument arrays rather than shell interpolation |
+| [`environment.go`](internal/pkx/environment.go) | Add actionable diagnostics for missing tools or runtime pins when needed |
+| [`manage.go`](internal/pkx/manage.go) | Only if extending `add`/`remove`/`run`; currently npm/pnpm/Yarn/Bun/Composer |
+| [`*_test.go`](internal/pkx/pkx_test.go) | Prove lockfile and native command behavior with offline fixtures |
+
+**A typical first PR:**
+
+1. Choose one labeled [good first issue](https://github.com/AmpedWasTaken/pkx/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22), e.g. Yarn lockfile behavior.
+2. Add a minimal fixture using the manager's *real* manifest/lockfile naming. Do not check in `node_modules`, `vendor`, tokens or generated downloads.
+3. Add a failing Go test for `Discover` or `InstallPlan`; assert the **exact** expected `Step` and that `pkx plan` never executes it.
+4. Update only the necessary manager code. Preserve existing manager detection precedence and native lockfile semantics.
+5. Run `gofmt -w cmd internal examples`, `go test ./...` and `go vet ./...`; link the issue and explain which operating systems were tested.
+
+We currently support **10 native managers for install orchestration**, but only **five managers across Node and PHP/Composer for add/remove/run**. New language-specific package editing or script execution needs an explicit design discussion first. See [the adapter example](examples/adapter-npm/README.md), [architecture](docs/ARCHITECTURE.md), and [roadmap](docs/ROADMAP.md).
 
 ## What helps reviewers
 

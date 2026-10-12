@@ -131,7 +131,7 @@ func validPackageResult(p PackageResult) bool {
 }
 
 func escapePackageName(s string) string {
-	return strings.ReplaceAll(s, "/", "%2F")
+	return url.QueryEscape(s)
 }
 
 func (r packageSearchReader) search(ctx context.Context, opts packageSearchOptions) (packageSearchResponse, error) {

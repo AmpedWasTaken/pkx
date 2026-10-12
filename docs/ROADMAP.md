@@ -31,10 +31,10 @@ The roadmap illustration in the README uses **shipped**, **next**, **planned** a
 | Reliability and runtime pin tests | Next | [#6](https://github.com/AmpedWasTaken/pkx/issues/6) |
 | Real mixed-language example | Next | [#5](https://github.com/AmpedWasTaken/pkx/issues/5) |
 | Script discovery and monorepo selection | Planned | [#16](https://github.com/AmpedWasTaken/pkx/issues/16), [#17](https://github.com/AmpedWasTaken/pkx/issues/17) |
-| **Remote bundle marketplace** | Design only; no remote service or remote bundle installs | [RFC 0001](rfcs/0001-bundle-registry.md), [#12](https://github.com/AmpedWasTaken/pkx/issues/12), [#13](https://github.com/AmpedWasTaken/pkx/issues/13) |
+| **Remote bundle marketplace** | Static curated preview and read-only discovery/fetch in v0.6 development; publishing and remote installs still unimplemented | [RFC 0001](rfcs/0001-bundle-registry.md), [#12](https://github.com/AmpedWasTaken/pkx/issues/12), [#13](https://github.com/AmpedWasTaken/pkx/issues/13) |
 | **Automatic runtime installation** | Design only; no runtime install execution | [RFC 0002](rfcs/0002-runtime-bootstrap.md), [#14](https://github.com/AmpedWasTaken/pkx/issues/14), [#15](https://github.com/AmpedWasTaken/pkx/issues/15) |
 
-**Technical starting points:** [offline registry catalog fixture](../examples/registry/catalog.v1.json) and [non-executable runtime plan fixture](../examples/runtime/bootstrap-plan.v1.json). They are examples used to discuss and validate future interfaces, **not available CLI features**.
+**Marketplace preview:** [browse the website](https://pkx.ampedwastaken.dev/marketplace/); installs are not automatic. **Technical starting points:** [offline registry catalog fixture](../examples/registry/catalog.v1.json) and [non-executable runtime plan fixture](../examples/runtime/bootstrap-plan.v1.json). They are examples used to discuss and validate future interfaces, **not available CLI features**.
 
 ## Potential ideas — not shipped
 

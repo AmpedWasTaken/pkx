@@ -21,7 +21,8 @@ bin="$work/pkx$suffix"
 root="$work"
 if [[ "${RUNNER_OS:-}" == "Windows" ]]; then root="$(cygpath -m "$work")"; fi
 
-"$bin" version | grep -Fx "pkx 0.5.0"
+expected_version="$(sed -n 's/^var Version = "\\([^"]*\\)"/\\1/p' internal/pkx/types.go)"
+"$bin" version | grep -Fx "pkx $expected_version"
 scan_out="$("$bin" scan --dir "$root" --json)"
 grep -Fq '"manager":"npm"' <<<"$scan_out"
 plan_out="$("$bin" plan --dir "$root")"

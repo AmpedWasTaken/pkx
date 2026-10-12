@@ -33,7 +33,7 @@ Commands:
   remove   Remove dependencies from a selected project
   run      Execute a declared Node/Composer project script
   doctor   Diagnose missing tools and pinned versions
-  bundle   Initialize or install a local dependency bundle
+  bundle   Local bundles plus read-only marketplace search/info/fetch
   version  Show the installed pkx version
   completion  Generate shell tab-completion (bash, zsh, fish, powershell)
 
@@ -218,6 +218,9 @@ func runBundle(ctx context.Context, args []string, stdout, stderr io.Writer) int
 		return 2
 	}
 	name := args[0]
+	if name == "search" || name == "info" || name == "fetch" {
+		return runMarketplaceBundle(ctx, name, args[1:], stdout, stderr)
+	}
 	fs := flag.NewFlagSet("bundle "+name, flag.ContinueOnError)
 	fs.SetOutput(stderr)
 	dir := fs.String("dir", ".", "workspace directory")

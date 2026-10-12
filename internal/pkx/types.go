@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-var Version = "0.5.0"
+var Version = "0.6.0-dev"
 
 type Project struct {
 	Directory string `json:"directory"`

@@ -48,6 +48,10 @@ jobs:
       - name: Native npm CLI smoke
         shell: bash
         run: bash scripts/smoke.sh
+      - name: Verify release packages (Linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: bash scripts/package-release.sh 0.5.0
       - name: Race tests (Linux)
         if: runner.os == 'Linux'
         run: go test -race ./...

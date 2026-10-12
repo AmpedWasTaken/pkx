@@ -74,41 +74,7 @@ jobs:
         shell: bash
         env:
           RELEASE_TAG: "${{ inputs.version || github.ref_name }}"
-        run: |
-          set -euo pipefail
-          mkdir -p dist stage
-          version="${RELEASE_TAG#v}"
-          for os in linux darwin windows; do
-            for arch in amd64 arm64; do
-              file="pkx"
-              if [[ "$os" == "windows" ]]; then file="pkx.exe"; fi
-              GOOS="$os" GOARCH="$arch" CGO_ENABLED=0 go build -trimpath \
-                -ldflags="-s -w -X github.com/AmpedWasTaken/pkx/internal/pkx.Version=$version" \
-                -o "stage/$file" ./cmd/pkx
-              name="pkx_${RELEASE_TAG}_${os}_${arch}"
-              if [[ "$os" == "linux" && "$arch" == "amd64" ]]; then
-                [[ "$(stage/pkx version)" == "pkx $version" ]]
-              fi
-              if [[ "$os" == "windows" ]]; then
-                (cd stage && zip -q "../dist/${name}.zip" "$file")
-              else
-                tar -czf "dist/${name}.tar.gz" -C stage "$file"
-              fi
-              rm -f "stage/$file"
-            done
-          done
-          (
-            cd dist
-            sha256sum ./* > SHA256SUMS
-            sha256sum -c SHA256SUMS
-            for asset in *.tar.gz; do
-              [[ "$(tar -tzf "$asset")" == "pkx" ]]
-            done
-            for asset in *.zip; do
-              [[ "$(unzip -Z -1 "$asset")" == "pkx.exe" ]]
-            done
-            [[ "$(find . -maxdepth 1 -name 'pkx_*' -type f | wc -l)" -eq 6 ]]
-          )
+        run: bash scripts/package-release.sh "${RELEASE_TAG#v}"
 
       - name: Publish GitHub release
         shell: bash

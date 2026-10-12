@@ -4,41 +4,60 @@
 
 pkx doesn't replace npm, pip, Composer, or Cargo. It discovers the manifests already in your repository, chooses the appropriate native commands, and executes them from the correct directories. It also supports small, reviewable JSON dependency bundles.
 
-> **Status:** v1 CLI. Local-first, no account, registry, telemetry, or background service. The public bundle marketplace discussed for the project is **not implemented**.
+> **Status:** v0.3.0 developer preview. Local-first, no account, registry, telemetry, or background service. The planned public bundle marketplace is **not implemented**.
 
 ## Quick start
 
-Requires Go 1.23+ to build from source. The native package managers for your projects must also be installed.
+pkx only requires its own CLI plus the package managers your project uses. To build from source, install Go 1.23 or later:
 
 ```sh
 git clone https://github.com/AmpedWasTaken/pkx.git
 cd pkx
 go install ./cmd/pkx
-
-cd /path/to/your/project
-pkx scan
-pkx up --dry-run
-pkx doctor
-pkx up
 ```
 
-On Windows, ensure `$(go env GOPATH)/bin` is on `PATH`; on Unix shells the usual location is `$(go env GOPATH)/bin` as well.
+Add `$(go env GOPATH)/bin` to your `PATH` if `pkx` isn't found. Cross-platform release archives are built by the GitHub release workflow when version tags are published.
 
-## Commands
+Then, from **any project directory**:
+
+```sh
+pkx status                 # What projects, tools and lockfiles do I have?
+pkx plan                   # What commands would pkx run? No side effects
+pkx up                     # Validate runtimes, then install dependencies
+```
+
+If a tool is missing, `pkx status` and `pkx doctor` show guidance. pkx doesn't install Node, Python, PHP or other system tools behind your back.
+
+## Everyday commands
 
 | Command | What it does |
 | --- | --- |
-| `pkx scan [--json]` | List supported projects, managers, and manifests |
-| `pkx install [--dry-run]` | Install or download project dependencies using native tools |
-| `pkx install --only node` | Limit installation to an ecosystem or manager (`pnpm`, `pip`, etc.) |
-| `pkx doctor` | Check which native commands are missing from PATH |
-| `pkx bundle init` | Create a starter `pkx.json` without overwriting an existing file |
-| `pkx bundle install pkx.json [--dry-run]` | Add packages declared in a bundle |
-| `pkx version` | Print the CLI version |
+| `pkx status` | Show detected projects, lockfiles and environment warnings |
+| `pkx status --json` | Structured status for scripts and editor integrations |
+| `pkx plan` | Preview the native install commands; never execute anything |
+| `pkx plan --json` | Structured command plan using workspace-relative directories |
+| `pkx up` | Check required tools and version pins, then install dependencies |
+| `pkx scan [--json]` | List supported projects and selected package managers |
+| `pkx install --dry-run` | Older preview syntax, kept for compatibility |
+| `pkx install --only node` | Install only one ecosystem or manager (`pnpm`, `pip`, etc.) |
+| `pkx doctor` | Check for missing tools and incompatible runtime pins |
+| `pkx init` | Create a local `pkx.json` starter bundle (no dependencies added) |
+| `pkx bundle install pkx.json --dry-run` | Preview applying a dependency bundle |
+| `pkx version` | Show CLI version |
 
-`scan`, `install`, and `doctor` accept `--dir PATH` and `--depth N` (default 4, maximum 20). Output is ordered deterministically by project location. The scanner ignores common generated and dependency directories and never follows symlinks.
+### Short commands and help
 
-**Inspect with `--dry-run` first**, especially for third-party repositories. The command preview shows what will run and where. pkx invokes tools as argument vectors without a shell, but package managers may still run dependency lifecycle scripts and download code.
+```sh
+pkx i --dry-run       # 'install' shortcut
+pkx ls                # 'scan' shortcut
+pkx help plan         # Command-specific examples and flags
+pkx up --help         # The same help through a command
+pkx plan --dir ./apps # Plan for another workspace
+```
+
+`scan`, `status`, `plan`, `up`, `install`, and `doctor` accept `--dir PATH` and `--depth N` (default 4, maximum 20). `plan`, `up`, and `install` accept `--only MANAGER` to select one ecosystem/manager. `--json` is available on `scan`, `plan` and `status`.
+
+**Inspect a plan before running a third-party repository.** pkx invokes package managers with argument arrays (not shell strings), but those tools may download and execute untrusted lifecycle scripts.
 
 ## Supported project types
 
@@ -65,7 +84,8 @@ Python installs with pip use a **project-local `.venv`**, not the global interpr
 Bundles are **a separate, explicit operation**. Ordinary `pkx install` never installs arbitrary bundle contents. Start with:
 
 ```sh
-pkx bundle init
+pkx init                     # Generates a starter with an empty packages array
+# Edit pkx.json to add the dependencies you actually want
 pkx bundle install pkx.json --dry-run
 pkx bundle install pkx.json
 ```
@@ -93,6 +113,8 @@ Supported bundle managers: npm, pnpm, Yarn, Bun, Composer, and pip. Bundles add 
 - Project discovery is bounded by `--depth`; generated folders and hidden directories are ignored.
 - No automatic rollback: installers can change files before failing. Review `git diff` and native tool output.
 - No registry, signatures, audit command, or package publishing in this version.
+- `status` checks environment readiness, not whether all dependencies have already been installed.
+- `plan` previews native commands; it does not guarantee the native installer will succeed.
 
 ## Development
 

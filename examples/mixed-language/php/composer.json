@@ -1,0 +1,9 @@
+{
+  "name": "pkx/example-php",
+  "description": "Minimal PHP fixture for the pkx mixed-language example. No packages are installed by default.",
+  "type": "project",
+  "license": "MIT",
+  "require": {
+    "php": ">=8.1"
+  }
+}

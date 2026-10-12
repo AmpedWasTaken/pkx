@@ -268,20 +268,9 @@ func runMarketplaceBundle(ctx context.Context, name string, args []string, stdou
 		fmt.Fprintf(stderr, "pkx: invalid workspace: %v\n", err)
 		return 1
 	}
-	dst := filepath.Join(root, "pkx.json")
-	file, err := os.OpenFile(dst, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0644)
+	dst, err := saveRegistryManifest(root, data)
 	if err != nil {
-		fmt.Fprintf(stderr, "pkx: cannot create %s (existing bundles are never overwritten): %v\n", dst, err)
-		return 1
-	}
-	if _, err = file.Write(data); err != nil {
-		file.Close()
-		os.Remove(dst)
-		fmt.Fprintf(stderr, "pkx: writing bundle failed: %v\n", err)
-		return 1
-	}
-	if err := file.Close(); err != nil {
-		fmt.Fprintf(stderr, "pkx: saving bundle failed: %v\n", err)
+		fmt.Fprintf(stderr, "pkx: cannot save bundle (existing pkx.json is never overwritten): %v\n", err)
 		return 1
 	}
 	fmt.Fprintf(stdout, "Saved verified bundle %s to %s\n", selector, dst)
@@ -289,3 +278,21 @@ func runMarketplaceBundle(ctx context.Context, name string, args []string, stdou
 	return 0
 }
 
+
+func saveRegistryManifest(root string, data []byte) (string, error) {
+	dst := filepath.Join(root, "pkx.json")
+	file, err := os.OpenFile(dst, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0644)
+	if err != nil {
+		return "", err
+	}
+	if _, err = file.Write(data); err != nil {
+		file.Close()
+		os.Remove(dst)
+		return "", err
+	}
+	if err = file.Close(); err != nil {
+		os.Remove(dst)
+		return "", err
+	}
+	return dst, nil
+}

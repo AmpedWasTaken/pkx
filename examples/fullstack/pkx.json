@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "name": "example-fullstack",
+  "packages": [
+    {
+      "manager": "pnpm",
+      "directory": "frontend",
+      "dependencies": ["vue", "axios"],
+      "devDependencies": ["vite"]
+    },
+    {
+      "manager": "composer",
+      "directory": "backend",
+      "dependencies": ["laravel/sanctum"]
+    }
+  ]
+}

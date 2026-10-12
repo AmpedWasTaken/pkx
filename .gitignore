@@ -1,0 +1,11 @@
+/pkx
+/pkx.exe
+*.test
+*.out
+coverage.out
+.DS_Store
+.idea/
+.vscode/
+**/.venv/
+**/node_modules/
+**/vendor/

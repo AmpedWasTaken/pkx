@@ -21,6 +21,7 @@ Entry point: `cmd/pkx/main.go`. Implementation: `internal/pkx/`.
 | `cli.go`, `ux.go`, `completion.go` | CLI routing, output and tab completion |
 | `bundle.go` | Validate local JSON bundles and plan package additions |
 | `*_test.go` | Regression and behavior tests |
+| `examples/adapter-npm/` | Runnable, read-only adapter-author example exercising real discovery/planning |
 
 ## Design principles
 

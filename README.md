@@ -1,99 +1,98 @@
 # pkx
 
-**Package eXchange** — one command to manage dependencies in mixed-language repositories.
+**Package eXchange** — run native package managers across a mixed-language repository with one command.
 
-pkx uses the **native** package managers already present in your project. It doesn't replace npm, pip, Composer, Cargo, or Go modules, and it does not invent a new cross-language dependency resolver.
+pkx doesn't replace npm, pip, Composer, or Cargo. It discovers the manifests already in your repository, chooses the appropriate native commands, and executes them from the correct directories. It also supports small, reviewable JSON dependency bundles.
 
-> **Status:** v0.1.0 developer preview. The local CLI works without a hosted registry or account. A community marketplace is a possible future feature, not part of this release.
+> **Status:** v1 CLI. Local-first, no account, registry, telemetry, or background service. The public bundle marketplace discussed for the project is **not implemented**.
 
-## Install
+## Quick start
 
-Build with Go 1.23 or later:
+Requires Go 1.23+ to build from source. The native package managers for your projects must also be installed.
 
 ```sh
 git clone https://github.com/AmpedWasTaken/pkx.git
 cd pkx
 go install ./cmd/pkx
-```
 
-Ensure Go's binary installation directory (`$(go env GOPATH)/bin`) is on your `PATH`.
-
-## Quick start
-
-```sh
-cd your-project
+cd /path/to/your/project
 pkx scan
-pkx install --dry-run
+pkx up --dry-run
 pkx doctor
-pkx install
+pkx up
 ```
 
-By default pkx discovers supported projects up to four directory levels below your current directory. It ignores generated directories such as `node_modules`, `vendor`, `.venv`, `target`, and `dist`, and doesn't follow symlinks.
-
-**Review the dry run before installing third-party projects.** Native package managers can execute lifecycle scripts and download dependencies.
+On Windows, ensure `$(go env GOPATH)/bin` is on `PATH`; on Unix shells the usual location is `$(go env GOPATH)/bin` as well.
 
 ## Commands
 
-| Command | Description |
+| Command | What it does |
 | --- | --- |
-| `pkx scan --json` | Discover supported ecosystems in machine-readable form |
-| `pkx install --dry-run` | Preview all native install/download commands |
-| `pkx install` | Execute the plan, stopping on the first error |
-| `pkx install --only node` | Install only one manager or ecosystem |
-| `pkx doctor` | Report missing package-manager executables |
-| `pkx bundle init` | Create a local `pkx.json` without overwriting one |
-| `pkx bundle install pkx.json --dry-run` | Preview adding a dependency bundle |
-| `pkx bundle install pkx.json` | Apply a bundle using native managers |
+| `pkx scan [--json]` | List supported projects, managers, and manifests |
+| `pkx install [--dry-run]` | Install or download project dependencies using native tools |
+| `pkx install --only node` | Limit installation to an ecosystem or manager (`pnpm`, `pip`, etc.) |
+| `pkx doctor` | Check which native commands are missing from PATH |
+| `pkx bundle init` | Create a starter `pkx.json` without overwriting an existing file |
+| `pkx bundle install pkx.json [--dry-run]` | Add packages declared in a bundle |
 | `pkx version` | Print the CLI version |
 
-`scan`, `install`, and `doctor` also accept `--dir PATH` and `--depth N` (default 4, range 0–20). The bundle commands accept `--dir PATH`.
+`scan`, `install`, and `doctor` accept `--dir PATH` and `--depth N` (default 4, maximum 20). Output is ordered deterministically by project location. The scanner ignores common generated and dependency directories and never follows symlinks.
 
-## Native manager support
+**Inspect with `--dry-run` first**, especially for third-party repositories. The command preview shows what will run and where. pkx invokes tools as argument vectors without a shell, but package managers may still run dependency lifecycle scripts and download code.
 
-| Manifest / lockfile | Selected manager | Command |
+## Supported project types
+
+| Project marker | Manager | Install behavior |
 | --- | --- | --- |
 | `package.json` + `package-lock.json` | npm | `npm ci` |
-| `package.json` without a lockfile | npm | `npm install` |
+| `package.json` (no lockfile) | npm | `npm install` |
 | `package.json` + `pnpm-lock.yaml` | pnpm | `pnpm install --frozen-lockfile` |
-| `package.json` + `yarn.lock` | Yarn | `yarn install` with matching locked-install flag |
+| `package.json` + `yarn.lock` | Yarn | Yarn 1: `--frozen-lockfile`; Yarn 2+: `--immutable` when specified in `packageManager` |
 | `package.json` + `bun.lock` / `bun.lockb` | Bun | `bun install --frozen-lockfile` |
 | `composer.json` | Composer | `composer install --no-interaction` |
-| `Cargo.toml` | Cargo | `cargo fetch` |
+| `Cargo.toml` | Cargo | `cargo fetch` (downloads dependencies, does not build) |
 | `go.mod` | Go | `go mod download` |
-| `pyproject.toml` + `uv.lock` | uv | `uv sync --locked` |
-| `pyproject.toml` + `poetry.lock` | Poetry | `poetry install --no-interaction` |
-| `requirements.txt` | pip | Create/reuse local `.venv` and install there |
+| `uv.lock` + `pyproject.toml` | uv | `uv sync --locked` |
+| `poetry.lock` + `pyproject.toml` | Poetry | `poetry install --no-interaction` |
+| `requirements.txt` | pip | create/reuse local `.venv`, then install requirements |
 
-When the Node `packageManager` property is set, it takes precedence. If conflicting Node lockfiles exist with no explicit manager, pkx stops rather than guessing.
+If `package.json` defines `packageManager`, that supported manager takes precedence over lockfile inference. If different Node lockfiles disagree and no manager is specified, pkx stops instead of guessing. An unsupported Python `pyproject.toml` without a supported lockfile or requirements file is ignored.
 
-A plain `pyproject.toml` without a recognized lockfile or `requirements.txt` is not currently supported. Cargo and Go download dependencies without building the project.
+Python installs with pip use a **project-local `.venv`**, not the global interpreter. On Windows, pkx looks for `python`; on Unix, `python3`.
 
-## Dependency bundles
+## Bundles
 
-A bundle is an explicit, reviewable JSON document. It never runs automatically as part of `pkx install`:
+Bundles are **a separate, explicit operation**. Ordinary `pkx install` never installs arbitrary bundle contents. Start with:
+
+```sh
+pkx bundle init
+pkx bundle install pkx.json --dry-run
+pkx bundle install pkx.json
+```
+
+A `pkx.json` bundle has this form:
 
 ```json
 {
   "schema": 1,
-  "name": "my-fullstack-bundle",
+  "name": "web-starter",
   "packages": [
-    {"manager": "pnpm", "directory": "frontend", "dependencies": ["vue", "axios"], "devDependencies": ["vite"]},
-    {"manager": "composer", "directory": "backend", "dependencies": ["laravel/sanctum"]}
+    { "manager": "pnpm", "directory": "frontend", "dependencies": ["vue", "axios"], "devDependencies": ["vite"] },
+    { "manager": "composer", "directory": "backend", "dependencies": ["laravel/sanctum"] }
   ]
 }
 ```
 
-Supported bundle managers are npm, pnpm, Yarn, Bun, Composer, and pip. The declared directories must already exist inside the workspace. Bundles use native package managers, so they may modify manifests and lockfiles. Python dependencies use a local `.venv`, created when missing.
+Supported bundle managers: npm, pnpm, Yarn, Bun, Composer, and pip. Bundles add dependencies through their native manager and **can modify the project's manifests and lockfiles**; inspect the resulting diff. pip bundle dependencies install into the target directory's `.venv`, which pkx creates if necessary. Bundles can't contain arbitrary shell commands. Bundle directories must exist inside the workspace and cannot escape it through `..` or symlinks. Paths are relative to `--dir` (default: current directory).
 
-## Limitations and security
+## Design decisions and limits
 
-- pkx **does not automatically install missing runtimes**. Use `pkx doctor` to see what is missing.
-- There is no automatic rollback after a failed command. Inspect `git diff` if a native manager modified your project before failing.
-- Install plans run sequentially. No background daemon or telemetry is used.
-- Bundles cannot contain shell commands, and package names that look like CLI options are rejected. This is **not a security sandbox**.
-- There is no remote bundle registry, signing service, AI dependency fixer, or built-in vulnerability scanner in this version.
-
-For contribution guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md). For the threat model, see [SECURITY.md](SECURITY.md).
+- No separate cross-ecosystem lockfile or dependency solver. Existing lockfiles remain the source of truth.
+- No automatic downloading of runtimes. `pkx doctor` reports missing commands so you can install them deliberately.
+- A deterministic, sequential plan avoids partially parallel writes to shared lockfiles. A failed command stops remaining steps.
+- Project discovery is bounded by `--depth`; generated folders and hidden directories are ignored.
+- No automatic rollback: installers can change files before failing. Review `git diff` and native tool output.
+- No registry, signatures, audit command, or package publishing in this version.
 
 ## Development
 
@@ -104,4 +103,8 @@ go vet ./...
 go build ./cmd/pkx
 ```
 
-MIT licensed.
+See [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md).
+
+## License
+
+MIT. See [LICENSE](LICENSE).

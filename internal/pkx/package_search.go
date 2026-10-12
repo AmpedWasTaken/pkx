@@ -16,14 +16,14 @@ const packageAPI = "https://pkx.ampedwastaken.dev/api/packages"
 const packageSearchLimit = 1024 * 1024
 
 type PackageResult struct {
-	ID          string  `json:"id"`
-	Ecosystem   string  `json:"ecosystem"`
-	Manager     string  `json:"manager"`
-	Name        string  `json:"name"`
-	Description string  `json:"description"`
-	Version     *string `json:"version"`
-	RegistryURL string  `json:"registryUrl"`
-	Downloads   *int64  `json:"downloads"`
+	ID          string   `json:"id"`
+	Ecosystem   string   `json:"ecosystem"`
+	Manager     string   `json:"manager"`
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+	Version     *string  `json:"version"`
+	RegistryURL string   `json:"registryUrl"`
+	Downloads   *int64   `json:"downloads"`
 	Command     []string `json:"command,omitempty"`
 	Project     string   `json:"project,omitempty"`
 }
@@ -122,7 +122,7 @@ func validPackageResult(p PackageResult) bool {
 	case "npm":
 		return p.RegistryURL == "https://www.npmjs.com/package/"+escapePackageName(p.Name)
 	case "composer":
-		return p.RegistryURL == "https://packagist.org/packages/"+strings.ReplaceAll(p.Name, "/", "/")
+		return p.RegistryURL == "https://packagist.org/packages/"+p.Name
 	case "cargo":
 		return p.RegistryURL == "https://crates.io/crates/"+escapePackageName(p.Name)
 	default:
@@ -135,8 +135,8 @@ func escapePackageName(s string) string {
 }
 
 func (r packageSearchReader) search(ctx context.Context, opts packageSearchOptions) (packageSearchResponse, error) {
-	url := r.base + "?q=" + url.QueryEscape(opts.Query) + "&ecosystem=" + opts.Ecosystem
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	endpoint := r.base + "?q=" + url.QueryEscape(opts.Query) + "&ecosystem=" + opts.Ecosystem
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
 	if err != nil {
 		return packageSearchResponse{}, err
 	}

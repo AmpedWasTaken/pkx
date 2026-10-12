@@ -17,16 +17,15 @@ func TestDraftBundleCatalogFixture(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	var catalog struct {
-	// The catalog schema is documentation only; the typed runtime parser is a future issue.
+	// The catalog schema is documentation only; a reusable parser is a future issue.
 	var raw struct {
-		Schema int `json:"schema"`
+		Schema  int `json:"schema"`
 		Bundles []struct {
-			ID string `json:"id"`
-			Version string `json:"version"`
-			Summary string `json:"summary"`
+			ID           string `json:"id"`
+			Version      string `json:"version"`
+			Summary      string `json:"summary"`
 			ManifestPath string `json:"manifest_path"`
-			Status string `json:"status"`
+			Status       string `json:"status"`
 		} `json:"bundles"`
 	}
 	if err := json.Unmarshal(content, &raw); err != nil {
@@ -59,16 +58,16 @@ func TestRuntimeProposalFixtureCannotExecute(t *testing.T) {
 		t.Fatal(err)
 	}
 	var plan struct {
-		Schema int `json:"schema"`
-		Mode string `json:"mode"`
-		ExecutionEnabled bool `json:"execution_enabled"`
-		Runtime struct {
-			Name string `json:"name"`
+		Schema           int    `json:"schema"`
+		Mode             string `json:"mode"`
+		ExecutionEnabled bool   `json:"execution_enabled"`
+		Runtime          struct {
+			Name      string `json:"name"`
 			Requested string `json:"requested"`
-			PinFile string `json:"pin_file"`
+			PinFile   string `json:"pin_file"`
 		} `json:"runtime"`
 		ProposedAction struct {
-			Type string `json:"type"`
+			Type        string `json:"type"`
 			Description string `json:"description"`
 		} `json:"proposed_action"`
 	}

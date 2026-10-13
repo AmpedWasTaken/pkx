@@ -62,13 +62,15 @@ pkx help bundle           # Command help
 | `package.json` + `yarn.lock` | Yarn | Locked install flag varies by pinned version |
 | `package.json` + `bun.lock` / `bun.lockb` | Bun | `bun install --frozen-lockfile` |
 | `composer.json` | Composer | `composer install --no-interaction` |
-| `requirements.txt` | pip | Create/reuse local `.venv`; install requirements |
+| `requirements.txt` | pip | Create `.venv` if missing, then install requirements with its Python interpreter |
 | `pyproject.toml` + `uv.lock` | uv | `uv sync --locked` |
 | `pyproject.toml` + `poetry.lock` | Poetry | `poetry install --no-interaction` |
 | `Cargo.toml` | Cargo | `cargo fetch` (no build) |
 | `go.mod` | Go | `go mod download` (no build) |
 
 A supported Node `packageManager` pin overrides lockfile inference. Conflicting Node lockfiles without a pin fail rather than guessing. A standalone `pyproject.toml` with no recognized lockfile or requirements file is not yet supported.
+
+For pip projects, `pkx plan` previews `python -m venv .venv` (or `python3` on Unix-like systems) only when `.venv` is missing. It then plans pip through the workspace-local interpreter: `.venv/Scripts/python.exe` on Windows and `.venv/bin/python` on Unix-like systems. An existing `.venv` is reused. Planning does not create the environment or access the network.
 
 ## Bundles are opt-in
 

@@ -98,8 +98,23 @@ func TestPipUsesLocalVenv(t *testing.T) {
 		t.Fatal(err)
 	}
 	steps, err := InstallPlan(root, projects, "")
-	if err != nil || len(steps) != 2 || steps[0].Args[1] != "venv" {
+	if err != nil || len(steps) != 2 {
 		t.Fatalf("bad plan %v %v", steps, err)
+	}
+	if steps[0].Directory != root || steps[0].Manager != "python" || steps[0].Binary != pythonCommand() ||
+		!reflect.DeepEqual(steps[0].Args, []string{"-m", "venv", ".venv"}) {
+		t.Fatalf("bad venv setup step: %#v", steps[0])
+	}
+	venvPython := filepath.Join(root, ".venv", "bin", "python")
+	if runtime.GOOS == "windows" {
+		venvPython = filepath.Join(root, ".venv", "Scripts", "python.exe")
+	}
+	if steps[1].Directory != root || steps[1].Manager != "pip" || steps[1].Binary != venvPython ||
+		!reflect.DeepEqual(steps[1].Args, []string{"-m", "pip", "install", "-r", "requirements.txt"}) {
+		t.Fatalf("bad pip install step: %#v", steps[1])
+	}
+	if _, err := os.Stat(filepath.Join(root, ".venv")); !os.IsNotExist(err) {
+		t.Fatalf("planning unexpectedly created .venv: %v", err)
 	}
 	if err := os.Mkdir(filepath.Join(root, ".venv"), 0755); err != nil {
 		t.Fatal(err)
@@ -107,6 +122,10 @@ func TestPipUsesLocalVenv(t *testing.T) {
 	steps, err = InstallPlan(root, projects, "")
 	if err != nil || len(steps) != 1 {
 		t.Fatalf("expected existing virtualenv, got %v %v", steps, err)
+	}
+	if steps[0].Directory != root || steps[0].Manager != "pip" || steps[0].Binary != venvPython ||
+		!reflect.DeepEqual(steps[0].Args, []string{"-m", "pip", "install", "-r", "requirements.txt"}) {
+		t.Fatalf("bad existing-venv pip step: %#v", steps[0])
 	}
 }
 

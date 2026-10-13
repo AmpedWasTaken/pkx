@@ -68,11 +68,23 @@ pkx install --dry-run         # Preview without making changes
 
 **Python, Rust and Go add/remove/run are not supported yet.** See [compatibility and limitations](docs/GETTING_STARTED.md#supported-managers-and-behavior). Marketplace discovery is in unreleased v0.6 development source; the published v0.5.0 binary does **not** have `pkx bundle search/info/fetch`.
 
-> pkx invokes native package managers, which may execute third-party lifecycle scripts. Always inspect untrusted repositories and use `pkx plan` first. Runtime installation and the remote bundle marketplace are not implemented yet.
+> pkx invokes native package managers, which may execute third-party lifecycle scripts. Always inspect untrusted repositories and use `pkx plan` first. Automatic runtime installation is not implemented. A read-only bundle catalog and package search are available on the website; their new CLI discovery commands are **unreleased v0.6 development features**.
 
 ## Try the example project
 
 Don't want to point pkx at a real repository yet? [`examples/mixed-language`](examples/mixed-language/README.md) is a small, committed fixture with a Node (`package.json`) and a PHP (`composer.json`) project side by side, no credentials and no generated dependency directories. Run `pkx scan`, `pkx status` and `pkx plan` from that directory to see what pkx detects and exactly what it would install.
+
+## Package discovery (unreleased v0.6 development source)
+
+Live searches use the website API backed by **npm, Packagist and crates.io**. This is separate from the published v0.5.0 release.
+
+```sh
+pkx search "http client" --ecosystem npm
+pkx search axios --project frontend  # Suggests pnpm/yarn/bun if selected project uses it
+pkx search serde --ecosystem cargo --json
+```
+
+Search is strictly **read-only** and does not install dependencies. For a polyglot repository, specify `--project` to get project-specific commands; pkx will not guess across multiple projects. PyPI full-text search requires a separate index and isn't shipped here. Current project adapter support is unchanged.
 
 ## Roadmap
 

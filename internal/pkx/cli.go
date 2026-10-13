@@ -34,6 +34,7 @@ Commands:
   run      Execute a declared Node/Composer project script
   doctor   Diagnose missing tools and pinned versions
   bundle   Local bundles plus read-only marketplace search/info/fetch
+  search   Find packages in official registries and suggest native commands
   version  Show the installed pkx version
   completion  Generate shell tab-completion (bash, zsh, fish, powershell)
 
@@ -76,6 +77,8 @@ func Run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 		return 0
 	case "scan", "status", "plan", "install", "doctor", "up":
 		return runWorkspace(ctx, command, args[1:], stdout, stderr)
+	case "search":
+		return runPackageSearch(ctx, args[1:], stdout, stderr)
 	case "add", "remove", "run":
 		return runManage(ctx, command, args[1:], stdout, stderr)
 	case "bundle":

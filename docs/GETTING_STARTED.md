@@ -128,3 +128,45 @@ pkx bundle install pkx.json --dry-run
 ```
 
 `search` and `info` do not modify local files. `fetch` downloads a versioned manifest over HTTPS, enforces the catalog SHA256 digest, validates schema and path constraints and **refuses to overwrite** an existing `pkx.json`. It does **not** install dependencies. Package-manager installation remains a separate explicit command; untrusted packages may run scripts. Catalog SHA256 integrity does not prove maintainer identity. See [RFC 0001](rfcs/0001-bundle-registry.md).
+
+## Universal package installation (v0.6 development, not in v0.5.0)
+
+A package can be added without a registry prefix. pkx detects the current project from its manifest and lockfile, then chooses the existing native manager:
+
+```sh
+pkx install http-server --dry-run  # npm/pnpm/Yarn/Bun depending on project
+pkx install http-server            # run native add/install in this project
+pkx install httpx --project backend --dry-run
+pkx install serde --project rust-tool --dry-run
+```
+
+In a project with only `package.json`, `pkx install http-server` picks npm unless a lockfile or `packageManager` declares another manager. In a Python project it uses pip, uv or Poetry as appropriate; Composer, Cargo and Go modules use their native tools. If multiple projects match, pkx refuses to guess and explains `--project DIR` and `--manager MANAGER`.
+
+**Backwards compatible:** `pkx install` with no package still bootstraps all detected project dependencies. **No network search is required to choose a manager**; it uses local project manifests. The target registry must actually contain the package name you request, and package-name validity differs by ecosystem. The command does not silently switch language when a package name is absent in the current project's registry. `--dry-run` performs no installation. Native dependency installation can run third-party scripts.
+
+## Advanced capability resolution (unreleased development)
+
+The official Marketplace has one **universal library card** for each use case, with reviewed implementation choices per language. The CLI embeds a pinned copy of the `capabilities.v1.json` catalog so mapped installs never depend on live or user-provided catalog contents.
+
+```sh
+# HTTP Client works in Node, Python, PHP, Rust and Go projects
+pkx install axios --dry-run
+# In Python this previews httpx; in PHP guzzlehttp/guzzle, etc.
+
+pkx install http-client --dry-run
+pkx install structured-logging --dry-run
+pkx install schema-validation --dry-run
+
+# Interactive installation: confirms before replacing a named library
+pkx install axios
+
+# Reviewed, explicit approval in non-interactive scripts
+pkx install axios --yes --project backend
+
+# Trusted private registries only (opt out of official registry check)
+pkx install my-private-package --skip-registry-check
+```
+
+The command uses local manifests/lockfiles to choose the target project and **native manager**. In a monorepo with multiple projects it stops and requires `--project DIRECTORY`, not a guess. For curated aliases (such as `axios`), it selects the purpose-similar library for the project's ecosystem. **It is NOT a drop-in API substitute** and can require import/configuration changes. Real installs check that the package name exists in the official native registry before executing the package manager; this is not a security audit or maintainer verification. An unmapped name is treated as an exact package name for that project's native ecosystem, not auto-guessed across all registries. `--dry-run` does not contact registries or install anything; only actual installs query package existence. A private registry can be selected only using the native tool and explicit `--skip-registry-check`.
+
+This functionality is **not in the published v0.5.0 binary**. Catalog mappings must be reviewed and updated together with the Marketplace's versioned capability catalog.

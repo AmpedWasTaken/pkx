@@ -1,0 +1,128 @@
+{
+  "schema": 1,
+  "updated": "2026-10-12",
+  "status": "curated-preview",
+  "disclaimer": "Same use case, not API-compatible. Review dependency and integration code before installing. Registry existence and health are verified separately.",
+  "families": [
+    {
+      "id": "http-client",
+      "title": "HTTP Client",
+      "summary": "Make API requests across JavaScript, Python, PHP, Rust and Go.",
+      "aliases": [
+        "http-client",
+        "axios",
+        "httpx",
+        "requests",
+        "guzzle",
+        "reqwest",
+        "resty"
+      ],
+      "variants": {
+        "node": {
+          "name": "axios",
+          "registry": "npm",
+          "url": "https://www.npmjs.com/package/axios"
+        },
+        "python": {
+          "name": "httpx",
+          "registry": "pypi",
+          "url": "https://pypi.org/project/httpx/"
+        },
+        "php": {
+          "name": "guzzlehttp/guzzle",
+          "registry": "packagist",
+          "url": "https://packagist.org/packages/guzzlehttp/guzzle"
+        },
+        "rust": {
+          "name": "reqwest",
+          "registry": "crates",
+          "url": "https://crates.io/crates/reqwest"
+        },
+        "go": {
+          "name": "github.com/go-resty/resty/v2",
+          "registry": "go",
+          "url": "https://pkg.go.dev/github.com/go-resty/resty/v2"
+        }
+      }
+    },
+    {
+      "id": "structured-logging",
+      "title": "Structured Logging",
+      "summary": "Structured, searchable application logs. Libraries use different APIs and configuration.",
+      "aliases": [
+        "structured-logging",
+        "pino",
+        "structlog",
+        "monolog",
+        "tracing",
+        "zap"
+      ],
+      "variants": {
+        "node": {
+          "name": "pino",
+          "registry": "npm",
+          "url": "https://www.npmjs.com/package/pino"
+        },
+        "python": {
+          "name": "structlog",
+          "registry": "pypi",
+          "url": "https://pypi.org/project/structlog/"
+        },
+        "php": {
+          "name": "monolog/monolog",
+          "registry": "packagist",
+          "url": "https://packagist.org/packages/monolog/monolog"
+        },
+        "rust": {
+          "name": "tracing",
+          "registry": "crates",
+          "url": "https://crates.io/crates/tracing"
+        },
+        "go": {
+          "name": "go.uber.org/zap",
+          "registry": "go",
+          "url": "https://pkg.go.dev/go.uber.org/zap"
+        }
+      }
+    },
+    {
+      "id": "schema-validation",
+      "title": "Data Validation",
+      "summary": "Validate structured data with language-specific validation libraries.",
+      "aliases": [
+        "schema-validation",
+        "zod",
+        "pydantic",
+        "symfony-validator",
+        "validator"
+      ],
+      "variants": {
+        "node": {
+          "name": "zod",
+          "registry": "npm",
+          "url": "https://www.npmjs.com/package/zod"
+        },
+        "python": {
+          "name": "pydantic",
+          "registry": "pypi",
+          "url": "https://pypi.org/project/pydantic/"
+        },
+        "php": {
+          "name": "symfony/validator",
+          "registry": "packagist",
+          "url": "https://packagist.org/packages/symfony/validator"
+        },
+        "rust": {
+          "name": "validator",
+          "registry": "crates",
+          "url": "https://crates.io/crates/validator"
+        },
+        "go": {
+          "name": "github.com/go-playground/validator/v10",
+          "registry": "go",
+          "url": "https://pkg.go.dev/github.com/go-playground/validator/v10"
+        }
+      }
+    }
+  ]
+}

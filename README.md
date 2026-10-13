@@ -52,7 +52,8 @@ pkx up            # Install dependencies using native tools
 For everyday work:
 
 ```sh
-pkx add axios                 # Add a dependency to a Node project
+pkx install http-server       # Detect language/manager and add package in this project
+pkx install http-server --dry-run  # Preview the native command first
 pkx add vite --dev            # Add development dependency
 pkx run dev                   # Run a declared project script
 pkx doctor                    # Diagnose missing tools
@@ -66,7 +67,11 @@ pkx install --dry-run         # Preview without making changes
 | **Install / `pkx up`** | **10:** npm, pnpm, Yarn, Bun, pip, uv, Poetry, Composer, Cargo, Go modules |
 | **`add` / `remove` / `run`** | **5:** npm, pnpm, Yarn, Bun, Composer (Node + PHP only) |
 
-**Python, Rust and Go add/remove/run are not supported yet.** See [compatibility and limitations](docs/GETTING_STARTED.md#supported-managers-and-behavior). Marketplace discovery is in unreleased v0.6 development source; the published v0.5.0 binary does **not** have `pkx bundle search/info/fetch`.
+**Unreleased v0.6 development:** `pkx install PACKAGE` detects the target project and supports native package additions across Node, Composer, pip, uv, Poetry, Cargo and Go. For monorepos use `--project DIRECTORY`; there are **no required ecosystem prefixes**. In the published v0.5.0, `pkx install` still only bootstraps project dependencies. 
+
+**Universal Libraries (v0.6 development):** `pkx install axios` selects Axios in a Node project, HTTPX in Python, Guzzle in PHP, Reqwest in Rust, and Resty in Go, using a **reviewed built-in capability catalog**. It shows the exact resolved name and native command; a different library requires confirmation (or explicit `--yes` for automation). Actual installs preflight the official registry; `--dry-run` is offline. Purpose-similar alternatives have different APIs and may need code changes. See the [website's universal library cards](https://pkx.ampedwastaken.dev/marketplace/).
+
+**Python, Rust and Go `add/remove/run` are not supported yet.** See [compatibility and limitations](docs/GETTING_STARTED.md#supported-managers-and-behavior). Marketplace discovery is in unreleased v0.6 development source; the published v0.5.0 binary does **not** have `pkx bundle search/info/fetch`.
 
 > pkx invokes native package managers, which may execute third-party lifecycle scripts. Always inspect untrusted repositories and use `pkx plan` first. Automatic runtime installation is not implemented. A read-only bundle catalog and package search are available on the website; their new CLI discovery commands are **unreleased v0.6 development features**.
 

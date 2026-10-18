@@ -99,7 +99,7 @@ func TestMarketplaceUntrustedInput(t *testing.T) {
 	dup := registryEntry{
 		ID: "pkx/starter", Version: "1.0.0", Title: "Starter", Summary: "Starter",
 		Maintainer: "pkx", Managers: []string{"npm"},
-		Path: "/marketplace/bundles/pkx/starter/1.0.0.json",
+		Path:   "/marketplace/bundles/pkx/starter/1.0.0.json",
 		SHA256: strings.Repeat("a", 64),
 	}
 	catalog, _ := json.Marshal(registryCatalog{Schema: 1, Bundles: []registryEntry{dup, dup}})

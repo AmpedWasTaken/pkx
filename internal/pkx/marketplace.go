@@ -225,7 +225,7 @@ func runMarketplaceBundle(ctx context.Context, name string, args []string, stdou
 		query := strings.ToLower(strings.Join(fs.Args(), " "))
 		matches := make([]registryEntry, 0)
 		for _, entry := range entries {
-			haystack := strings.ToLower(entry.Title+" "+entry.Summary+" "+entry.ID+" "+strings.Join(entry.Packages, " "))
+			haystack := strings.ToLower(entry.Title + " " + entry.Summary + " " + entry.ID + " " + strings.Join(entry.Packages, " "))
 			if strings.Contains(haystack, query) {
 				matches = append(matches, entry)
 			}
@@ -277,7 +277,6 @@ func runMarketplaceBundle(ctx context.Context, name string, args []string, stdou
 	fmt.Fprintln(stdout, "Nothing installed. Review pkx.json, then run 'pkx bundle install pkx.json --dry-run'.")
 	return 0
 }
-
 
 func saveRegistryManifest(root string, data []byte) (string, error) {
 	dst := filepath.Join(root, "pkx.json")

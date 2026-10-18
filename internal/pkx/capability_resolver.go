@@ -1,9 +1,9 @@
 package pkx
 
 import (
-	_ "embed"
 	"bufio"
 	"context"
+	_ "embed"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -99,9 +99,9 @@ func resolveCapability(catalog capabilityCatalog, request, ecosystem string) (re
 				return resolvedPackage{}, fmt.Errorf("capability %q has no reviewed %s alternative; refusing to guess", family.ID, ecosystem)
 			}
 			return resolvedPackage{
-				Requested: request,
-				Package: variant.Name,
-				Capability: family.Title,
+				Requested:   request,
+				Package:     variant.Name,
+				Capability:  family.Title,
 				Alternative: !strings.EqualFold(request, variant.Name),
 			}, nil
 		}
@@ -204,4 +204,3 @@ func resolveAndCheckPackages(ctx context.Context, project Project, requested []s
 	}
 	return packages, resolved, nil
 }
-

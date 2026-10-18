@@ -287,4 +287,3 @@ func runPackageSearch(ctx context.Context, args []string, stdout, stderr io.Writ
 	fmt.Fprintln(stdout, "Nothing installed. Review packages before using pkx add or the native manager.")
 	return 0
 }
-
